@@ -82,7 +82,7 @@ $tips = [
     {{-- Capital & Risk --}}
     <div class="border-t border-gray-800 pt-6 mb-6">
         <h3 class="text-gray-500 text-xs uppercase tracking-wider mb-4">Capital & Risco</h3>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <div>
                 <div class="flex items-center gap-1.5 mb-1">
@@ -173,7 +173,7 @@ $tips = [
                        class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
-            <div class="col-span-2">
+            <div class="col-span-1 sm:col-span-2">
                 <div class="flex items-center gap-1.5 mb-1">
                     <label class="text-sm text-gray-400">Volume Mínimo 24h (USDT)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
@@ -187,7 +187,7 @@ $tips = [
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
-            <div class="col-span-2 flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
+            <div class="col-span-1 sm:col-span-2 flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
                 <input wire:model="use_bnb_fees" type="checkbox" id="bnb_fees" class="w-4 h-4 mt-0.5 accent-green-500 shrink-0" />
                 <div class="flex-1">
                     <div class="flex items-center gap-1.5">

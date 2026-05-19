@@ -27,7 +27,7 @@
     @endif
 
     {{-- Stats row --}}
-    <div class="grid grid-cols-5 gap-3 mb-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
         <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
             <div class="text-gray-500 text-xs uppercase tracking-wider mb-1">P&L Total</div>
             <div class="text-2xl font-bold {{ $this->totalPnl >= 0 ? 'text-green-400' : 'text-red-400' }}">

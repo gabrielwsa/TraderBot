@@ -1,4 +1,4 @@
-<div class="grid grid-cols-4 gap-3">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
     <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
         <div class="flex items-center justify-between mb-1">
             <div class="text-gray-500 text-xs uppercase tracking-wider">P&L Hoje</div>

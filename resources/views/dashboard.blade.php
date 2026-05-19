@@ -17,24 +17,24 @@
         </div>
 
         {{-- Positions + Wallet + Log --}}
-        <div class="grid grid-cols-12 gap-4 items-stretch">
-            <div class="col-span-5 flex flex-col" wire:poll.4s>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <div class="col-span-1 lg:col-span-5 flex flex-col" wire:poll.4s>
                 <livewire:active-positions class="flex-1" />
             </div>
-            <div class="col-span-3 flex flex-col">
+            <div class="col-span-1 lg:col-span-3 flex flex-col">
                 <livewire:wallet-info class="flex-1" />
             </div>
-            <div class="col-span-4 flex flex-col" wire:poll.3s>
+            <div class="col-span-1 lg:col-span-4 flex flex-col" wire:poll.3s>
                 <livewire:activity-log class="flex-1" />
             </div>
         </div>
 
         {{-- Scanner + Fee Tracker --}}
-        <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="col-span-1 lg:col-span-8">
                 <livewire:market-scanner />
             </div>
-            <div class="col-span-4">
+            <div class="col-span-1 lg:col-span-4">
                 <livewire:fee-tracker />
             </div>
         </div>

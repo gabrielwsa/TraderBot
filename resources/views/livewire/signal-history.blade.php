@@ -1,7 +1,7 @@
 <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+    <div class="px-5 py-3 border-b border-gray-800 flex flex-wrap items-center gap-2 justify-between">
         <h2 class="font-semibold text-sm text-white">Histórico de Sinais</h2>
-        <div class="flex gap-1">
+        <div class="flex gap-1 flex-wrap">
             @foreach (['all' => 'Todos', 'BUY' => 'Compra', 'SELL' => 'Venda', 'HOLD' => 'Hold'] as $val => $label)
             <button wire:click="$set('filter', '{{ $val }}')"
                     class="text-xs px-2.5 py-1 rounded-lg transition {{ $filter === $val ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-white hover:bg-gray-800' }}">
