@@ -14,10 +14,6 @@ $tips = [
 ];
 @endphp
 
-{{-- Macro: label + tooltip wrapper. Each has its own x-data so hover on the tooltip itself doesn't close it. --}}
-@php
-function tipBtn(string $key, string $label, array $tips): string { return ''; }
-@endphp
 
 <div>
 
@@ -41,7 +37,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">API Key</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['api_key'] }}
                         </div>
                     </div>
@@ -55,7 +51,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">API Secret</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['api_secret'] }}
                         </div>
                     </div>
@@ -69,7 +65,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Ambiente</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['environment'] }}
                         </div>
                     </div>
@@ -93,7 +89,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Capital (USDT)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['capital_usdt'] }}
                         </div>
                     </div>
@@ -108,7 +104,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Capital por Trade (%)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['capital_per_trade_pct'] }}
                         </div>
                     </div>
@@ -122,7 +118,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Posições Simultâneas</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['max_open_positions'] }}
                         </div>
                     </div>
@@ -136,7 +132,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Timeframe</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['timeframe'] }}
                         </div>
                     </div>
@@ -154,7 +150,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Stop Loss (%)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['stop_loss_pct'] }}
                         </div>
                     </div>
@@ -168,7 +164,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Take Profit (%)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['take_profit_pct'] }}
                         </div>
                     </div>
@@ -182,7 +178,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                     <label class="text-sm text-gray-400">Volume Mínimo 24h (USDT)</label>
                     <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                         <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                             {{ $tips['min_volume_usdt'] }}
                         </div>
                     </div>
@@ -198,7 +194,7 @@ function tipBtn(string $key, string $label, array $tips): string { return ''; }
                         <label for="bnb_fees" class="text-sm text-gray-300 cursor-pointer">Pagar taxas com BNB</label>
                         <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
                             <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                            <div x-show="show" x-cloak class="absolute left-5 top-0 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                            <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
                                 {{ $tips['use_bnb_fees'] }}
                             </div>
                         </div>
