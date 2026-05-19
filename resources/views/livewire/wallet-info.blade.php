@@ -1,4 +1,4 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden h-full">
     <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <h2 class="font-semibold text-sm text-white">Carteira</h2>

@@ -24,6 +24,7 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     @livewireStyles
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-full" x-data="{ dropdownOpen: false, settingsOpen: false }"

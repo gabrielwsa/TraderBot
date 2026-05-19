@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BotLog;
 use App\Models\BotSetting;
 use App\Models\Position;
+use App\Models\Signal;
 use App\Models\Trade;
 use Exception;
 
@@ -93,9 +94,22 @@ class TradingEngine
                 $klines = $this->binance->getKlines($pair, $this->settings->timeframe, 100);
                 $analysis = $this->indicators->analyze($klines);
 
+                $currentPrice = end($klines)['close'] ?? 0;
+                $savedSignal = Signal::create([
+                    'pair'        => $pair,
+                    'signal'      => $analysis['signal'],
+                    'ema9'        => $analysis['ema9'],
+                    'ema21'       => $analysis['ema21'],
+                    'rsi'         => $analysis['rsi'],
+                    'macd_hist'   => $analysis['macd_hist'],
+                    'price'       => $currentPrice,
+                    'traded'      => false,
+                    'skip_reason' => $analysis['signal'] === 'BUY' ? null : 'No signal',
+                ]);
+
                 if ($analysis['signal'] === 'BUY') {
                     BotLog::trade("BUY signal for {$pair}: " . implode(', ', $analysis['reasons']));
-                    $this->openPosition($pair, $analysis);
+                    $this->openPosition($pair, $analysis, $savedSignal);
                     $slots--;
                 }
             } catch (Exception $e) {
@@ -104,7 +118,7 @@ class TradingEngine
         }
     }
 
-    private function openPosition(string $pair, array $analysis): void
+    private function openPosition(string $pair, array $analysis, ?Signal $savedSignal = null): void
     {
         $tradeUsdt = $this->settings->capital_usdt * ($this->settings->capital_per_trade_pct / 100);
         $feeRate = $this->settings->fee_rate;
@@ -144,6 +158,10 @@ class TradingEngine
             'order_id'     => $order['orderId'] ?? null,
             'order_status' => $order['status'] ?? 'FILLED',
         ]);
+
+        if ($savedSignal) {
+            $savedSignal->update(['traded' => true]);
+        }
 
         BotLog::trade(
             "Opened position: {$pair} @ {$avgPrice} | Qty: {$executedQty} | SL: {$stopLoss} | TP: {$takeProfit}",
