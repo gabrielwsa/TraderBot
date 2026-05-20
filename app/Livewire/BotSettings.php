@@ -23,6 +23,9 @@ class BotSettings extends Component
     public string $timeframe = '15m';
 
     public bool $saved = false;
+    public array $blacklist = [];
+    public string $blacklistSearch = '';
+    public array $blacklistResults = [];
 
     public function mount(): void
     {
@@ -38,6 +41,38 @@ class BotSettings extends Component
         $this->use_bnb_fees = $s->use_bnb_fees;
         $this->min_volume_usdt = $s->min_volume_usdt;
         $this->timeframe = $s->timeframe;
+        $this->blacklist = $s->pair_blacklist ?? [];
+    }
+
+    public function updatedBlacklistSearch(string $value): void
+    {
+        if (strlen($value) < 1) {
+            $this->blacklistResults = [];
+            return;
+        }
+
+        $cached = \Illuminate\Support\Facades\Cache::get('scanner_pairs', []);
+        $search = strtoupper($value);
+
+        $this->blacklistResults = collect($cached)
+            ->filter(fn($p) => str_contains($p['symbol'], $search) && !in_array($p['symbol'], $this->blacklist))
+            ->take(6)
+            ->values()
+            ->toArray();
+    }
+
+    public function addToBlacklist(string $symbol): void
+    {
+        if (!in_array($symbol, $this->blacklist)) {
+            $this->blacklist[] = $symbol;
+        }
+        $this->blacklistSearch = '';
+        $this->blacklistResults = [];
+    }
+
+    public function removeFromBlacklist(string $symbol): void
+    {
+        $this->blacklist = array_values(array_filter($this->blacklist, fn($s) => $s !== $symbol));
     }
 
     public function save(): void
@@ -87,6 +122,7 @@ class BotSettings extends Component
             'use_bnb_fees'          => $this->use_bnb_fees,
             'min_volume_usdt'       => $this->min_volume_usdt,
             'timeframe'             => $this->timeframe,
+            'pair_blacklist'        => $this->blacklist ?: null,
         ]);
 
         BotLog::info('Settings updated');

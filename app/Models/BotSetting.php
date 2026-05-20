@@ -9,7 +9,7 @@ class BotSetting extends Model
     protected $fillable = [
         'api_key', 'api_secret', 'environment', 'capital_usdt',
         'capital_per_trade_pct', 'max_open_positions', 'stop_loss_pct',
-        'take_profit_pct', 'use_bnb_fees', 'min_volume_usdt', 'timeframe', 'is_active',
+        'take_profit_pct', 'use_bnb_fees', 'min_volume_usdt', 'timeframe', 'is_active', 'pair_blacklist',
     ];
 
     protected $casts = [
@@ -21,6 +21,7 @@ class BotSetting extends Model
         'use_bnb_fees' => 'boolean',
         'min_volume_usdt' => 'float',
         'is_active' => 'boolean',
+        'pair_blacklist' => 'array',
     ];
 
     public static function current(): self

@@ -98,7 +98,8 @@ class TradingEngine
 
         $pairs = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25);
         $openPairs = Position::open()->pluck('pair')->toArray();
-        $pairs = array_diff($pairs, $openPairs);
+        $blacklist = $this->settings->pair_blacklist ?? [];
+        $pairs = array_diff($pairs, $openPairs, $blacklist);
 
         BotLog::info('Scanning ' . count($pairs) . ' pairs');
 

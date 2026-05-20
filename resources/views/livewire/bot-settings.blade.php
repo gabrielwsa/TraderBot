@@ -196,6 +196,60 @@ $tips = [
                 </div>
             </div>
 
+            {{-- Pair Blacklist --}}
+            <div class="col-span-1 sm:col-span-2">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <label class="text-sm text-gray-400">Pares Bloqueados</label>
+                    <span class="text-xs text-gray-500">— o bot nunca opera esses pares</span>
+                </div>
+
+                {{-- Selected tags --}}
+                @if (!empty($blacklist))
+                <div class="flex flex-wrap gap-2 mb-2">
+                    @foreach ($blacklist as $pair)
+                    <span class="flex items-center gap-1.5 bg-red-950/50 border border-red-900/50 text-red-300 text-xs px-2.5 py-1 rounded-full">
+                        {{ $pair }}
+                        <button wire:click="removeFromBlacklist('{{ $pair }}')" class="hover:text-white transition leading-none">&times;</button>
+                    </span>
+                    @endforeach
+                </div>
+                @endif
+
+                {{-- Search input with dropdown --}}
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <input wire:model.live="blacklistSearch"
+                           @focus="open = true"
+                           type="text"
+                           placeholder="Buscar par... ex: EUR, BTC, SOL"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-red-500 focus:outline-none" />
+
+                    @if (!empty($blacklistResults))
+                    <div x-show="open" class="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                        @foreach ($blacklistResults as $result)
+                        <button wire:click="addToBlacklist('{{ $result['symbol'] }}')"
+                                @click="open = false"
+                                class="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-700 transition text-left">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300">
+                                    {{ strtoupper(substr(str_replace('USDT', '', $result['symbol']), 0, 2)) }}
+                                </span>
+                                <span class="text-white text-sm font-medium">{{ str_replace('USDT', '', $result['symbol']) }}</span>
+                                <span class="text-gray-500 text-xs">/USDT</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="text-gray-300 font-mono">{{ number_format($result['price'], $result['price'] < 1 ? 4 : 2) }}</span>
+                                <span class="{{ $result['change_pct'] >= 0 ? 'text-green-400' : 'text-red-400' }} font-medium w-14 text-right">
+                                    {{ $result['change_pct'] >= 0 ? '+' : '' }}{{ $result['change_pct'] }}%
+                                </span>
+                                <span class="text-gray-500 w-16 text-right">${{ $result['volume_usdt'] }}M</span>
+                            </div>
+                        </button>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+
             <div class="col-span-1 sm:col-span-2 flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
                 <input wire:model="use_bnb_fees" type="checkbox" id="bnb_fees" class="w-4 h-4 mt-0.5 accent-green-500 shrink-0" />
                 <div class="flex-1">
