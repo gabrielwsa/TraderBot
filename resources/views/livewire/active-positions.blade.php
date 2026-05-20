@@ -1,4 +1,4 @@
-<div class="bg-gray-900 rounded-xl border border-gray-700 h-full">
+<div class="bg-gray-900 rounded-xl border border-gray-700 h-full" wire:poll.4s>
     <div class="px-5 py-4 border-b border-gray-700">
         <h2 class="font-semibold text-white">Active Positions <span class="text-gray-400 text-sm">({{ $positions->count() }})</span></h2>
     </div>

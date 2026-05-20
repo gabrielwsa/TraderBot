@@ -53,7 +53,10 @@ class WalletInfo extends Component
         if ($test['ok']) {
             try {
                 $wallet = $binance->getWalletInfo();
-                $this->balances = $wallet['balances'];
+                $this->balances = collect($wallet['balances'])
+                    ->whereIn('asset', ['USDT', 'USD'])
+                    ->values()
+                    ->toArray();
                 $this->canTrade = $wallet['can_trade'];
                 $this->makerFee = $wallet['maker_commission'];
                 $this->takerFee = $wallet['taker_commission'];
