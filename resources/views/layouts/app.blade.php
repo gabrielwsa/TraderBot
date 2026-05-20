@@ -8,10 +8,10 @@
     @livewireStyles
 </head>
 <body class="h-full text-gray-100">
-    <nav class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+    <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <span class="text-green-400 text-xl font-bold">&#9650; BotTrade</span>
-            <span class="text-gray-500 text-sm">Binance Spot</span>
+            <span class="text-gray-400 text-sm">Binance Spot</span>
         </div>
         <div class="flex gap-6 text-sm">
             <a href="{{ route('dashboard') }}" class="hover:text-green-400 transition {{ request()->routeIs('dashboard') ? 'text-green-400' : 'text-gray-400' }}">Dashboard</a>

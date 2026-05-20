@@ -1,9 +1,9 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden h-full">
-    <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+<div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden h-full">
+    <div class="px-5 py-3 border-b border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <h2 class="font-semibold text-sm text-white">Carteira</h2>
             @if ($lastChecked)
-                <span class="text-gray-600 text-xs">atualizado às {{ $lastChecked }}</span>
+                <span class="text-gray-400 text-xs">atualizado às {{ $lastChecked }}</span>
             @endif
         </div>
         <button wire:click="check" wire:loading.attr="disabled"
@@ -25,13 +25,13 @@
             <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
             </svg>
-            <p class="text-gray-500 text-sm">Nenhuma chave de API configurada</p>
-            <p class="text-gray-600 text-xs">Configure nas <button @click="settingsOpen = true" class="text-green-500 hover:text-green-400 underline">Configurações</button></p>
+            <p class="text-gray-400 text-sm">Nenhuma chave de API configurada</p>
+            <p class="text-gray-400 text-xs">Configure nas <button @click="settingsOpen = true" class="text-green-500 hover:text-green-400 underline">Configurações</button></p>
         </div>
 
     @elseif ($checking || (!$connected && $lastChecked === null && $hasApiKeys))
         {{-- Loading --}}
-        <div class="px-5 py-6 flex items-center justify-center gap-2 text-gray-500 text-sm">
+        <div class="px-5 py-6 flex items-center justify-center gap-2 text-gray-400 text-sm">
             <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8v8z"/>
             </svg>
@@ -40,7 +40,7 @@
 
     @else
         {{-- Connection status --}}
-        <div class="px-5 py-3 flex items-center gap-3 {{ $connected ? 'bg-green-950/20' : 'bg-red-950/20' }} border-b border-gray-800">
+        <div class="px-5 py-3 flex items-center gap-3 {{ $connected ? 'bg-green-950/20' : 'bg-red-950/20' }} border-b border-gray-700">
             <div class="relative flex items-center justify-center w-3.5 h-3.5 shrink-0">
                 @if ($connected)
                     <span class="absolute w-full h-full rounded-full bg-green-400 opacity-30 animate-ping"></span>
@@ -53,7 +53,7 @@
                 {{ $connectionMessage }}
             </span>
             @if ($connected && $accountType)
-                <span class="ml-auto text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">{{ $accountType }}</span>
+                <span class="ml-auto text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">{{ $accountType }}</span>
             @endif
         </div>
 
@@ -70,26 +70,26 @@
 
         @if ($connected)
             {{-- Account info row --}}
-            <div class="px-5 py-2.5 border-b border-gray-800 grid grid-cols-3 gap-4 text-xs">
+            <div class="px-5 py-2.5 border-b border-gray-700 grid grid-cols-3 gap-4 text-xs">
                 <div>
-                    <span class="text-gray-600">Pode operar</span>
+                    <span class="text-gray-400">Pode operar</span>
                     <div class="{{ $canTrade ? 'text-green-400' : 'text-red-400' }} font-medium mt-0.5">
                         {{ $canTrade ? 'Sim' : 'Não' }}
                     </div>
                 </div>
                 <div>
-                    <span class="text-gray-600">Taxa Maker</span>
+                    <span class="text-gray-400">Taxa Maker</span>
                     <div class="text-gray-300 font-medium mt-0.5">{{ $makerFee }}%</div>
                 </div>
                 <div>
-                    <span class="text-gray-600">Taxa Taker</span>
+                    <span class="text-gray-400">Taxa Taker</span>
                     <div class="text-gray-300 font-medium mt-0.5">{{ $takerFee }}%</div>
                 </div>
             </div>
 
             {{-- Balances --}}
             @if (!empty($balances))
-                <div class="divide-y divide-gray-800/60">
+                <div class="divide-y divide-gray-700/60">
                     @foreach ($balances as $balance)
                     <div class="px-5 py-2.5 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -108,10 +108,10 @@
                     @endforeach
                 </div>
             @else
-                <div class="px-5 py-6 text-center text-gray-600 text-sm">Carteira vazia</div>
+                <div class="px-5 py-6 text-center text-gray-400 text-sm">Carteira vazia</div>
             @endif
         @else
-            <div class="px-5 py-4 text-center text-gray-600 text-xs">
+            <div class="px-5 py-4 text-center text-gray-400 text-xs">
                 Clique em "Verificar" para testar a conexão
             </div>
         @endif

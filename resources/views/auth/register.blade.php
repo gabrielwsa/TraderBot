@@ -10,10 +10,10 @@
     <div class="w-full max-w-sm">
         <div class="text-center mb-8">
             <span class="text-green-400 text-3xl font-bold">&#9650; BotTrade</span>
-            <p class="text-gray-500 text-sm mt-1">Binance Spot Bot</p>
+            <p class="text-gray-400 text-sm mt-1">Binance Spot Bot</p>
         </div>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8">
             <h1 class="text-white text-xl font-semibold mb-6">Criar conta</h1>
 
             @if ($errors->any())
@@ -79,7 +79,7 @@
                 </button>
             </form>
 
-            <p class="text-center text-gray-500 text-sm mt-6">
+            <p class="text-center text-gray-400 text-sm mt-6">
                 Já tem conta?
                 <a href="{{ route('login') }}" class="text-green-400 hover:text-green-300 transition">Entrar</a>
             </p>

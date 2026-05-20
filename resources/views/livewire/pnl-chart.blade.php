@@ -1,7 +1,7 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+<div class="bg-gray-900 border border-gray-700 rounded-xl p-5">
     <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-white text-sm">P&L Acumulado</h2>
-        <button wire:click="loadData" class="text-xs text-gray-500 hover:text-white transition px-2 py-1 rounded hover:bg-gray-800">
+        <button wire:click="loadData" class="text-xs text-gray-400 hover:text-white transition px-2 py-1 rounded hover:bg-gray-800">
             Atualizar
         </button>
     </div>

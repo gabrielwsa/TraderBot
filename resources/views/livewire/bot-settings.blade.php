@@ -29,7 +29,7 @@ $tips = [
 
     {{-- API Credentials --}}
     <div class="mb-6">
-        <h3 class="text-gray-500 text-xs uppercase tracking-wider mb-4">Credenciais da API</h3>
+        <h3 class="text-gray-400 text-xs uppercase tracking-wider mb-4">Credenciais da API</h3>
         <div class="space-y-4">
 
             <div>
@@ -80,8 +80,8 @@ $tips = [
     </div>
 
     {{-- Capital & Risk --}}
-    <div class="border-t border-gray-800 pt-6 mb-6">
-        <h3 class="text-gray-500 text-xs uppercase tracking-wider mb-4">Capital & Risco</h3>
+    <div class="border-t border-gray-700 pt-6 mb-6">
+        <h3 class="text-gray-400 text-xs uppercase tracking-wider mb-4">Capital & Risco</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <div>
@@ -208,7 +208,7 @@ $tips = [
                             </div>
                         </div>
                     </div>
-                    <p class="text-gray-600 text-xs mt-0.5">0.075% por trade em vez de 0.1% — economiza 25% em taxas</p>
+                    <p class="text-gray-400 text-xs mt-0.5">0.075% por trade em vez de 0.1% — economiza 25% em taxas</p>
                 </div>
             </div>
 
@@ -250,7 +250,7 @@ $tips = [
     </div>
     @endif
 
-    <div class="border border-gray-800 rounded-lg p-4 bg-gray-800/30 text-xs text-gray-500 mb-6 space-y-1">
+    <div class="border border-gray-700 rounded-lg p-4 bg-gray-800/30 text-xs text-gray-400 mb-6 space-y-1">
         <div class="text-gray-400 font-medium mb-2">Resumo de risco por trade</div>
         <div class="flex justify-between">
             <span>Valor por operação</span>

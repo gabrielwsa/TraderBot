@@ -1,10 +1,10 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden" wire:poll.10s>
-    <div class="px-5 py-3 border-b border-gray-800 flex flex-wrap items-center gap-2 justify-between">
+<div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden" wire:poll.10s>
+    <div class="px-5 py-3 border-b border-gray-700 flex flex-wrap items-center gap-2 justify-between">
         <h2 class="font-semibold text-sm text-white">Histórico de Sinais</h2>
         <div class="flex gap-1 flex-wrap">
             @foreach (['all' => 'Todos', 'BUY' => 'Compra', 'SELL' => 'Venda', 'HOLD' => 'Hold'] as $val => $label)
             <button wire:click="$set('filter', '{{ $val }}')"
-                    class="text-xs px-2.5 py-1 rounded-lg transition {{ $filter === $val ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-white hover:bg-gray-800' }}">
+                    class="text-xs px-2.5 py-1 rounded-lg transition {{ $filter === $val ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                 {{ $label }}
             </button>
             @endforeach
@@ -12,12 +12,12 @@
     </div>
 
     @if ($signals->isEmpty())
-        <div class="px-5 py-8 text-center text-gray-600 text-sm">Nenhum sinal gerado ainda</div>
+        <div class="px-5 py-8 text-center text-gray-400 text-sm">Nenhum sinal gerado ainda</div>
     @else
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
+                    <tr class="text-gray-400 text-xs uppercase tracking-wider border-b border-gray-700">
                         <th class="px-5 py-2.5 text-left">Par</th>
                         <th class="px-5 py-2.5 text-left">Sinal</th>
                         <th class="px-5 py-2.5 text-right">Preço</th>
@@ -29,7 +29,7 @@
                         <th class="px-5 py-2.5 text-right">Hora</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60">
+                <tbody class="divide-y divide-gray-700/60">
                     @foreach ($signals as $s)
                     <tr class="hover:bg-gray-800/40 transition">
                         <td class="px-5 py-2.5 font-medium text-white">{{ $s->pair }}</td>
@@ -37,7 +37,7 @@
                             <span class="text-xs px-2 py-0.5 rounded-full font-medium
                                 {{ $s->signal === 'BUY'  ? 'bg-green-950 text-green-400 border border-green-900' : '' }}
                                 {{ $s->signal === 'SELL' ? 'bg-red-950 text-red-400 border border-red-900' : '' }}
-                                {{ $s->signal === 'HOLD' ? 'bg-gray-800 text-gray-500 border border-gray-700' : '' }}">
+                                {{ $s->signal === 'HOLD' ? 'bg-gray-800 text-gray-400 border border-gray-700' : '' }}">
                                 {{ $s->signal }}
                             </span>
                         </td>
@@ -54,7 +54,7 @@
                             @if ($s->traded)
                                 <span class="text-green-400 text-xs">✓</span>
                             @else
-                                <span class="text-gray-600 text-xs" title="{{ $s->skip_reason }}">—</span>
+                                <span class="text-gray-400 text-xs" title="{{ $s->skip_reason }}">—</span>
                             @endif
                         </td>
                         <td class="px-5 py-2.5 text-right text-gray-400 text-xs">{{ $s->created_at->format('d/m H:i:s') }}</td>
@@ -63,7 +63,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-5 py-3 border-t border-gray-800">
+        <div class="px-5 py-3 border-t border-gray-700">
             {{ $signals->links() }}
         </div>
     @endif

@@ -1,14 +1,14 @@
-<div class="bg-gray-900 rounded-xl border border-gray-800 h-full">
-    <div class="px-5 py-4 border-b border-gray-800">
-        <h2 class="font-semibold text-white">Active Positions <span class="text-gray-500 text-sm">({{ $positions->count() }})</span></h2>
+<div class="bg-gray-900 rounded-xl border border-gray-700 h-full">
+    <div class="px-5 py-4 border-b border-gray-700">
+        <h2 class="font-semibold text-white">Active Positions <span class="text-gray-400 text-sm">({{ $positions->count() }})</span></h2>
     </div>
     @if ($positions->isEmpty())
-        <div class="px-5 py-8 text-center text-gray-500">No open positions</div>
+        <div class="px-5 py-8 text-center text-gray-400">No open positions</div>
     @else
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
+                    <tr class="text-gray-400 text-xs uppercase tracking-wider border-b border-gray-700">
                         <th class="px-5 py-3 text-left">Pair</th>
                         <th class="px-5 py-3 text-right">Entry</th>
                         <th class="px-5 py-3 text-right">Current</th>
@@ -19,7 +19,7 @@
                         <th class="px-5 py-3 text-right">Opened</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800">
+                <tbody class="divide-y divide-gray-700">
                     @foreach ($positions as $position)
                     <tr class="hover:bg-gray-800 transition">
                         <td class="px-5 py-3 font-semibold text-white">{{ $position->pair }}</td>
@@ -32,7 +32,7 @@
                             {{ $position->unrealized_pnl >= 0 ? '+' : '' }}{{ number_format($position->unrealized_pnl, 4) }}
                             ({{ $position->unrealized_pnl_pct >= 0 ? '+' : '' }}{{ number_format($position->unrealized_pnl_pct, 2) }}%)
                         </td>
-                        <td class="px-5 py-3 text-right text-gray-500 text-xs">{{ $position->created_at->diffForHumans() }}</td>
+                        <td class="px-5 py-3 text-right text-gray-400 text-xs">{{ $position->created_at->diffForHumans() }}</td>
                     </tr>
                     @endforeach
                 </tbody>

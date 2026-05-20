@@ -1,9 +1,9 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+<div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden flex flex-col h-full" wire:poll.60s="refresh">
+    <div class="px-5 py-3 border-b border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <h2 class="font-semibold text-sm text-white">Scanner de Mercado</h2>
             @if ($lastUpdated)
-                <span class="text-gray-600 text-xs">{{ $lastUpdated === 'cache' ? 'cache' : 'às ' . $lastUpdated }}</span>
+                <span class="text-gray-400 text-xs">{{ $lastUpdated === 'cache' ? 'cache' : 'às ' . $lastUpdated }}</span>
             @endif
         </div>
         <button wire:click="refresh" wire:loading.attr="disabled"
@@ -20,26 +20,26 @@
     </div>
 
     @if (empty($pairs))
-        <div class="px-5 py-8 text-center text-gray-600 text-sm">
+        <div class="flex-1 flex items-center justify-center text-gray-400 text-sm">
             Clique em "Atualizar" para carregar os pares
         </div>
     @else
-        <div class="overflow-x-auto max-h-80 overflow-y-auto">
+        <div class="overflow-x-auto overflow-y-auto" style="max-height: 260px">
             <table class="w-full text-sm">
-                <thead class="sticky top-0 bg-gray-900 border-b border-gray-800">
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider">
+                <thead class="sticky top-0 bg-gray-900 border-b border-gray-700">
+                    <tr class="text-gray-400 text-xs uppercase tracking-wider">
                         <th class="px-5 py-2.5 text-left">Par</th>
                         <th class="px-5 py-2.5 text-right">Preço</th>
                         <th class="px-5 py-2.5 text-right">24h</th>
                         <th class="px-5 py-2.5 text-right">Volume</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800/60">
+                <tbody class="divide-y divide-gray-700/60">
                     @foreach ($pairs as $pair)
                     <tr class="hover:bg-gray-800/40 transition">
                         <td class="px-5 py-2 font-medium text-white">
                             {{ str_replace('USDT', '', $pair['symbol']) }}
-                            <span class="text-gray-600 font-normal">/USDT</span>
+                            <span class="text-gray-400 font-normal">/USDT</span>
                         </td>
                         <td class="px-5 py-2 text-right text-gray-300 font-mono text-xs">
                             {{ number_format($pair['price'], $pair['price'] < 1 ? 6 : ($pair['price'] < 100 ? 4 : 2)) }}
@@ -47,7 +47,7 @@
                         <td class="px-5 py-2 text-right font-medium {{ $pair['change_pct'] >= 0 ? 'text-green-400' : 'text-red-400' }}">
                             {{ $pair['change_pct'] >= 0 ? '+' : '' }}{{ $pair['change_pct'] }}%
                         </td>
-                        <td class="px-5 py-2 text-right text-gray-500 text-xs">
+                        <td class="px-5 py-2 text-right text-gray-400 text-xs">
                             ${{ $pair['volume_usdt'] }}M
                         </td>
                     </tr>

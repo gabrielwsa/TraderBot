@@ -30,12 +30,12 @@
         </div>
 
         {{-- Scanner + Fee Tracker --}}
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div class="col-span-1 lg:col-span-8">
-                <livewire:market-scanner />
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <div class="col-span-1 lg:col-span-8 flex flex-col">
+                <livewire:market-scanner class="flex-1" />
             </div>
-            <div class="col-span-1 lg:col-span-4">
-                <livewire:fee-tracker />
+            <div class="col-span-1 lg:col-span-4 flex flex-col">
+                <livewire:fee-tracker class="flex-1" />
             </div>
         </div>
 
