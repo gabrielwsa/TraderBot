@@ -183,8 +183,17 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="min_volume_usdt" type="number" step="100000"
-                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+                <div x-data="{
+                    display: Number({{ $min_volume_usdt }}).toLocaleString('pt-BR'),
+                    update(e) {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        this.display = raw ? Number(raw).toLocaleString('pt-BR') : '';
+                        $wire.set('min_volume_usdt', raw ? Number(raw) : 0);
+                    }
+                }">
+                    <input type="text" x-model="display" @input="update($event)"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+                </div>
             </div>
 
             <div class="col-span-1 sm:col-span-2 flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
