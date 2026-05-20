@@ -74,6 +74,14 @@ class BinanceService
         return $usdt ? (float) $usdt['free'] : 0.0;
     }
 
+    public function getAssetBalance(string $asset): float
+    {
+        $data     = $this->signedGet('/api/v3/account');
+        $balances = collect($data['balances'] ?? []);
+        $found    = $balances->firstWhere('asset', $asset);
+        return $found ? (float) $found['free'] : 0.0;
+    }
+
     public function getWalletInfo(): array
     {
         $data = $this->signedGet('/api/v3/account');
@@ -153,7 +161,14 @@ class BinanceService
 
     public function placeSellOrder(string $symbol, float $quantity): array
     {
-        $lotSize = $this->getLotSizeFilter($symbol);
+        // Use actual wallet balance if stored quantity exceeds what's available
+        $asset   = str_replace('USDT', '', $symbol);
+        $balance = $this->getAssetBalance($asset);
+        if ($balance > 0 && $balance < $quantity) {
+            $quantity = $balance;
+        }
+
+        $lotSize  = $this->getLotSizeFilter($symbol);
         $quantity = $this->adjustQuantity($quantity, $lotSize['step_size']);
 
         return $this->signedPost('/api/v3/order', [

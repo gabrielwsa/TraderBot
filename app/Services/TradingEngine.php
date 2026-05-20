@@ -115,7 +115,7 @@ class TradingEngine
         }
 
         $this->settings->refresh();
-        $pairs     = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25, $this->settings->min_volatility_pct);
+        $pairs     = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 50, $this->settings->min_volatility_pct);
         $openPairs = Position::open()->pluck('pair')->toArray();
         $blacklist = $this->settings->pair_blacklist ?? [];
         $pairs     = array_values(array_diff($pairs, $openPairs, $blacklist));
@@ -128,18 +128,11 @@ class TradingEngine
             if ($slots <= 0) break;
 
             try {
-                // Multi-timeframe: 1D → 1h → 15m (all must be BULL)
-                $klines1d = $this->binance->getKlines($pair, '1d', 50);
-                $trend1d  = $this->indicators->trendDirection($klines1d);
-
-                if ($trend1d !== 'BULL') {
-                    continue;
-                }
-
+                // Multi-timeframe: 1h must not be BEAR (BULL or NEUTRAL ok for daytrade)
                 $klines1h = $this->binance->getKlines($pair, '1h', 50);
                 $trend1h  = $this->indicators->trendDirection($klines1h);
 
-                if ($trend1h !== 'BULL') {
+                if ($trend1h === 'BEAR') {
                     continue;
                 }
 

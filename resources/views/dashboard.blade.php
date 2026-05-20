@@ -11,18 +11,20 @@
             <livewire:bot-status />
         </div>
 
-        {{-- P&L Chart --}}
-        <div wire:poll.30s>
-            <livewire:pnl-chart />
-        </div>
-
-        {{-- Positions + Wallet + Log --}}
+        {{-- P&L Chart + Wallet --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-            <div class="col-span-1 lg:col-span-5 flex flex-col" wire:poll.4s>
-                <livewire:active-positions class="flex-1" />
+            <div class="col-span-1 lg:col-span-9 flex flex-col" wire:poll.30s>
+                <livewire:pnl-chart class="flex-1" />
             </div>
             <div class="col-span-1 lg:col-span-3 flex flex-col">
                 <livewire:wallet-info class="flex-1" />
+            </div>
+        </div>
+
+        {{-- Positions + Log --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <div class="col-span-1 lg:col-span-8 flex flex-col" wire:poll.4s>
+                <livewire:active-positions class="flex-1" />
             </div>
             <div class="col-span-1 lg:col-span-4 flex flex-col" wire:poll.3s>
                 <livewire:activity-log class="flex-1" />
