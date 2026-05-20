@@ -1,4 +1,4 @@
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden" wire:poll.10s>
     <div class="px-5 py-3 border-b border-gray-800 flex flex-wrap items-center gap-2 justify-between">
         <h2 class="font-semibold text-sm text-white">Histórico de Sinais</h2>
         <div class="flex gap-1 flex-wrap">
@@ -57,7 +57,7 @@
                                 <span class="text-gray-600 text-xs" title="{{ $s->skip_reason }}">—</span>
                             @endif
                         </td>
-                        <td class="px-5 py-2.5 text-right text-gray-600 text-xs">{{ $s->created_at->format('d/m H:i:s') }}</td>
+                        <td class="px-5 py-2.5 text-right text-gray-400 text-xs">{{ $s->created_at->format('d/m H:i:s') }}</td>
                     </tr>
                     @endforeach
                 </tbody>

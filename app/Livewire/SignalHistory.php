@@ -16,6 +16,6 @@ class SignalHistory extends Component
         if ($this->filter !== 'all') {
             $query->where('signal', $this->filter);
         }
-        return view('livewire.signal-history', ['signals' => $query->paginate(20)]);
+        return view('livewire.signal-history', ['signals' => $query->paginate(20)->onEachSide(1)]);
     }
 }
