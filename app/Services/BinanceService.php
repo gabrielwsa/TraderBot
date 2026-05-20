@@ -39,7 +39,7 @@ class BinanceService
         ], $response->json());
     }
 
-    public function getTopUsdtPairs(float $minVolume, int $limit = 30): array
+    public function getTopUsdtPairs(float $minVolume, int $limit = 30, float $minVolatilityPct = 0): array
     {
         $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/ticker/24hr");
         $this->assertSuccess($response);
@@ -49,7 +49,8 @@ class BinanceService
                 str_ends_with($t['symbol'], 'USDT') &&
                 !in_array($t['symbol'], ['USDTUSDT', 'BUSDUSDT', 'TUSDUSDT', 'USDCUSDT']) &&
                 (float) $t['quoteVolume'] >= $minVolume &&
-                (float) $t['lastPrice'] > 0
+                (float) $t['lastPrice'] > 0 &&
+                abs((float) $t['priceChangePercent']) >= $minVolatilityPct
             )
             ->sortByDesc('quoteVolume')
             ->take($limit)

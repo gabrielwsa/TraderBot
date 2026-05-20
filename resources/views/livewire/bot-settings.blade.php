@@ -10,6 +10,7 @@ $tips = [
     'take_profit_pct'       => 'Percentual de lucro alvo para fechar o trade automaticamente. Ex: 4% = vende ao atingir 4% de ganho.',
     'timeframe'             => 'Intervalo dos candles usados para calcular os indicadores (EMA, RSI, MACD). 15m é o mais usado para day trade.',
     'min_volume_usdt'       => 'Volume mínimo negociado em 24h para um par ser considerado. Filtra moedas sem liquidez — quanto maior, mais seguro.',
+    'min_volatility_pct'    => 'Variação mínima de preço nas últimas 24h (valor absoluto). Ex: 1% exclui pares estáveis como EUR/USDT. Aumentar evita entrar em ativos sem movimento.',
     'use_bnb_fees'          => 'Se você tiver BNB na carteira, a Binance desconta as taxas em BNB com 25% de desconto (0.075% em vez de 0.1%).',
 ];
 @endphp
@@ -194,6 +195,26 @@ $tips = [
                     <input type="text" x-model="display" @input="update($event)"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
                 </div>
+            </div>
+
+            <div class="col-span-1 sm:col-span-2">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <label class="text-sm text-gray-400">Volatilidade Mínima 24h (%)</label>
+                    <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
+                        <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                            {{ $tips['min_volatility_pct'] }}
+                        </div>
+                    </div>
+                </div>
+                <input wire:model.live="min_volatility_pct" type="number" step="0.1" min="0" max="50"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+                @error('min_volatility_pct') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                @if ($min_volatility_pct == 0)
+                <p class="text-yellow-400 text-xs mt-1">⚠ Sem filtro de volatilidade — o bot pode entrar em pares estáveis como EUR/USDT.</p>
+                @elseif ($min_volatility_pct >= 5)
+                <p class="text-yellow-400 text-xs mt-1">⚠ Volatilidade muito alta — poucos pares serão considerados.</p>
+                @endif
             </div>
 
             {{-- Pair Blacklist --}}

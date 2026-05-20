@@ -34,17 +34,22 @@
                         <th class="px-5 py-2.5 text-right">Volume</th>
                     </tr>
                 </thead>
+                @php $minVol = \App\Models\BotSetting::current()->min_volatility_pct ?? 1.0; @endphp
                 <tbody class="divide-y divide-gray-700/60">
                     @foreach ($pairs as $pair)
-                    <tr class="hover:bg-gray-800/40 transition">
-                        <td class="px-5 py-2 font-medium text-white">
+                    @php $filtered = abs($pair['change_pct']) < $minVol; @endphp
+                    <tr class="hover:bg-gray-800/40 transition {{ $filtered ? 'opacity-40' : '' }}">
+                        <td class="px-5 py-2 font-medium {{ $filtered ? 'text-gray-500' : 'text-white' }}">
                             {{ str_replace('USDT', '', $pair['symbol']) }}
-                            <span class="text-gray-400 font-normal">/USDT</span>
+                            <span class="text-gray-500 font-normal">/USDT</span>
+                            @if ($filtered)
+                                <span class="ml-1 text-xs text-gray-600">bloqueado</span>
+                            @endif
                         </td>
-                        <td class="px-5 py-2 text-right text-gray-300 font-mono text-xs">
+                        <td class="px-5 py-2 text-right text-gray-400 font-mono text-xs">
                             {{ number_format($pair['price'], $pair['price'] < 1 ? 6 : ($pair['price'] < 100 ? 4 : 2)) }}
                         </td>
-                        <td class="px-5 py-2 text-right font-medium {{ $pair['change_pct'] >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                        <td class="px-5 py-2 text-right font-medium {{ $filtered ? 'text-gray-600' : ($pair['change_pct'] >= 0 ? 'text-green-400' : 'text-red-400') }}">
                             {{ $pair['change_pct'] >= 0 ? '+' : '' }}{{ $pair['change_pct'] }}%
                         </td>
                         <td class="px-5 py-2 text-right text-gray-400 text-xs">

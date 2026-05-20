@@ -96,7 +96,7 @@ class TradingEngine
             return;
         }
 
-        $pairs = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25);
+        $pairs = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25, $this->settings->min_volatility_pct);
         $openPairs = Position::open()->pluck('pair')->toArray();
         $blacklist = $this->settings->pair_blacklist ?? [];
         $pairs = array_diff($pairs, $openPairs, $blacklist);
