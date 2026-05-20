@@ -37,13 +37,13 @@
                 <tbody class="divide-y divide-gray-700">
                     @foreach ($positions as $p)
                     @php
-                        if ($p->progress >= 85)       { $badge = ['ALVO',  'text-green-300 bg-green-900/50 border-green-800/50', '']; }
-                        elseif ($p->profit_locked)     { $badge = ['GANHO', 'text-green-300 bg-green-900/50 border-green-800/50', '']; }
-                        elseif ($p->trailing_active)   { $badge = ['TSL',   'text-blue-300 bg-blue-900/50 border-blue-800/50',   '']; }
-                        elseif ($p->dist_to_sl < 0.5)  { $badge = ['RISCO', 'text-red-300 bg-red-900/50 border-red-800/50',     'animate-pulse']; }
-                        else                           { $badge = null; }
+                        if ($p->progress >= 85)       { $badge = ['ALVO',  'text-green-300 bg-green-900/50 border-green-800/50', '']; $rowClass = 'bg-green-950/30 hover:bg-green-950/50 border-l-2 border-l-green-500'; }
+                        elseif ($p->profit_locked)     { $badge = ['GANHO', 'text-green-300 bg-green-900/50 border-green-800/50', '']; $rowClass = 'bg-green-950/20 hover:bg-green-950/40 border-l-2 border-l-green-700'; }
+                        elseif ($p->trailing_active)   { $badge = ['TSL',   'text-blue-300 bg-blue-900/50 border-blue-800/50',   '']; $rowClass = 'bg-blue-950/20 hover:bg-blue-950/40 border-l-2 border-l-blue-600'; }
+                        elseif ($p->dist_to_sl < 0.5)  { $badge = ['RISCO', 'text-red-300 bg-red-900/50 border-red-800/50',     'animate-pulse']; $rowClass = 'bg-red-950/30 hover:bg-red-950/50 border-l-2 border-l-red-500 animate-pulse'; }
+                        else                           { $badge = null; $rowClass = 'hover:bg-gray-800'; }
                     @endphp
-                    <tr class="hover:bg-gray-800 transition">
+                    <tr class="transition {{ $rowClass }}">
                         <td class="px-5 py-3 font-semibold text-white">
                             <div class="flex items-center gap-2">
                                 {{ $p->pair }}
