@@ -26,7 +26,6 @@ class TradingEngine
     {
         $hasOpenPositions = Position::open()->exists();
 
-        // When stopped, keep monitoring open positions (take profit only) until all are closed
         if (!$this->settings->is_active) {
             if ($hasOpenPositions) {
                 BotLog::info('Bot stopped — draining ' . Position::open()->count() . ' open position(s) at take profit');
@@ -68,13 +67,22 @@ class TradingEngine
                     continue;
                 }
 
+                // Trailing stop: raise stop_loss_price as price climbs
+                if ($this->settings->trailing_stop_enabled) {
+                    $this->updateTrailingStop($position, $price);
+                    $position->refresh();
+                }
+
                 if ($price <= $position->stop_loss_price) {
-                    BotLog::warning("Stop loss triggered for {$position->pair} at {$price}");
-                    $this->closePosition($position, 'stop_loss');
+                    $reason = $position->stop_loss_price > $position->entry_price * (1 - $this->settings->stop_loss_pct / 100 * 1.01)
+                        ? 'trailing_stop'
+                        : 'stop_loss';
+                    BotLog::warning("Stop loss triggered for {$position->pair} at {$price} [{$reason}]");
+                    $this->closePosition($position, $reason);
                     continue;
                 }
 
-                $klines = $this->binance->getKlines($position->pair, $this->settings->timeframe, 50);
+                $klines  = $this->binance->getKlines($position->pair, $this->settings->timeframe, 50);
                 $analysis = $this->indicators->analyze($klines);
 
                 if ($analysis['signal'] === 'SELL') {
@@ -84,6 +92,16 @@ class TradingEngine
             } catch (Exception $e) {
                 BotLog::error("Error monitoring {$position->pair}: " . $e->getMessage());
             }
+        }
+    }
+
+    private function updateTrailingStop(Position $position, float $price): void
+    {
+        $trailPct      = $this->settings->trailing_stop_pct / 100;
+        $newTrailStop  = $price * (1 - $trailPct);
+
+        if ($newTrailStop > $position->stop_loss_price) {
+            $position->update(['stop_loss_price' => $newTrailStop]);
         }
     }
 
@@ -97,10 +115,10 @@ class TradingEngine
         }
 
         $this->settings->refresh();
-        $pairs = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25, $this->settings->min_volatility_pct);
+        $pairs     = $this->binance->getTopUsdtPairs($this->settings->min_volume_usdt, 25, $this->settings->min_volatility_pct);
         $openPairs = Position::open()->pluck('pair')->toArray();
         $blacklist = $this->settings->pair_blacklist ?? [];
-        $pairs = array_diff($pairs, $openPairs, $blacklist);
+        $pairs     = array_values(array_diff($pairs, $openPairs, $blacklist));
 
         BotLog::info('Scanning ' . count($pairs) . ' pairs');
 
@@ -110,11 +128,19 @@ class TradingEngine
             if ($slots <= 0) break;
 
             try {
-                $klines = $this->binance->getKlines($pair, $this->settings->timeframe, 100);
+                // Multi-timeframe: check 1h trend before analyzing 15m
+                $klines1h = $this->binance->getKlines($pair, '1h', 50);
+                $trend1h  = $this->indicators->trendDirection($klines1h);
+
+                if ($trend1h !== 'BULL') {
+                    continue; // Skip pairs not in an uptrend on 1h
+                }
+
+                $klines   = $this->binance->getKlines($pair, $this->settings->timeframe, 100);
                 $analysis = $this->indicators->analyze($klines);
 
                 $currentPrice = end($klines)['close'] ?? 0;
-                $savedSignal = Signal::create([
+                $savedSignal  = Signal::create([
                     'pair'        => $pair,
                     'signal'      => $analysis['signal'],
                     'ema9'        => $analysis['ema9'],
@@ -123,11 +149,12 @@ class TradingEngine
                     'macd_hist'   => $analysis['macd_hist'],
                     'price'       => $currentPrice,
                     'traded'      => false,
-                    'skip_reason' => $analysis['signal'] === 'BUY' ? null : 'No signal',
+                    'skip_reason' => $analysis['signal'] === 'BUY' ? null : "No signal (1h trend: {$trend1h})",
                 ]);
 
                 if ($analysis['signal'] === 'BUY') {
-                    BotLog::trade("BUY signal for {$pair}: " . implode(', ', $analysis['reasons']));
+                    $volLabel = $analysis['volume_ok'] ? 'volume OK' : 'low volume';
+                    BotLog::trade("BUY signal for {$pair} [1h:{$trend1h}, {$volLabel}]: " . implode(', ', $analysis['reasons']));
                     $this->openPosition($pair, $analysis, $savedSignal);
                     $slots--;
                 }
@@ -140,17 +167,38 @@ class TradingEngine
     private function openPosition(string $pair, array $analysis, ?Signal $savedSignal = null): void
     {
         $tradeUsdt = $this->settings->capital_usdt * ($this->settings->capital_per_trade_pct / 100);
-        $feeRate = $this->settings->fee_rate;
+        $feeRate   = $this->settings->fee_rate;
 
         $order = $this->binance->placeBuyOrder($pair, $tradeUsdt);
 
-        $executedQty = (float) ($order['executedQty'] ?? 0);
+        $executedQty         = (float) ($order['executedQty'] ?? 0);
         $cummulativeQuoteQty = (float) ($order['cummulativeQuoteQty'] ?? $tradeUsdt);
-        $avgPrice = $executedQty > 0 ? $cummulativeQuoteQty / $executedQty : $analysis['ema9'];
-        $fee = $cummulativeQuoteQty * $feeRate;
+        $avgPrice            = $executedQty > 0 ? $cummulativeQuoteQty / $executedQty : $analysis['ema9'];
+        $fee                 = $cummulativeQuoteQty * $feeRate;
 
-        $stopLoss   = $avgPrice * (1 - $this->settings->stop_loss_pct / 100);
-        $takeProfit = $avgPrice * (1 + $this->settings->take_profit_pct / 100);
+        // ATR-based SL/TP: adapt to each coin's real volatility
+        $atr = $analysis['atr'] ?? 0;
+
+        if ($atr > 0) {
+            // SL: tighter of ATR*1.5 or configured %, protecting from over-wide stops
+            $atrSlDist = $atr * 1.5;
+            $cfgSlDist = $avgPrice * ($this->settings->stop_loss_pct / 100);
+            $slDist    = min($atrSlDist, $cfgSlDist);
+
+            // TP: wider of ATR*3.0 or configured %, letting winners run
+            $atrTpDist = $atr * 3.0;
+            $cfgTpDist = $avgPrice * ($this->settings->take_profit_pct / 100);
+            $tpDist    = max($atrTpDist, $cfgTpDist);
+        } else {
+            $slDist = $avgPrice * ($this->settings->stop_loss_pct / 100);
+            $tpDist = $avgPrice * ($this->settings->take_profit_pct / 100);
+        }
+
+        $stopLoss   = $avgPrice - $slDist;
+        $takeProfit = $avgPrice + $tpDist;
+
+        $slPct = round(($slDist / $avgPrice) * 100, 2);
+        $tpPct = round(($tpDist / $avgPrice) * 100, 2);
 
         $position = Position::create([
             'pair'              => $pair,
@@ -183,7 +231,7 @@ class TradingEngine
         }
 
         BotLog::trade(
-            "Opened position: {$pair} @ {$avgPrice} | Qty: {$executedQty} | SL: {$stopLoss} | TP: {$takeProfit}",
+            "Opened position: {$pair} @ {$avgPrice} | Qty: {$executedQty} | SL: {$stopLoss} (-{$slPct}%) | TP: {$takeProfit} (+{$tpPct}%) | ATR: " . round($atr, 6),
             ['position_id' => $position->id]
         );
     }
@@ -194,13 +242,13 @@ class TradingEngine
 
         $order = $this->binance->placeSellOrder($position->pair, $position->quantity);
 
-        $executedQty = (float) ($order['executedQty'] ?? $position->quantity);
-        $receivedUsdt = (float) ($order['cummulativeQuoteQty'] ?? 0);
-        $closePrice = $executedQty > 0 ? $receivedUsdt / $executedQty : $position->current_price;
-        $fee = $receivedUsdt * $feeRate;
-        $netReceived = $receivedUsdt - $fee;
+        $executedQty   = (float) ($order['executedQty'] ?? $position->quantity);
+        $receivedUsdt  = (float) ($order['cummulativeQuoteQty'] ?? 0);
+        $closePrice    = $executedQty > 0 ? $receivedUsdt / $executedQty : $position->current_price;
+        $fee           = $receivedUsdt * $feeRate;
+        $netReceived   = $receivedUsdt - $fee;
 
-        $realizedPnl = $netReceived - $position->invested_usdt;
+        $realizedPnl    = $netReceived - $position->invested_usdt;
         $realizedPnlPct = ($realizedPnl / $position->invested_usdt) * 100;
 
         $position->update([

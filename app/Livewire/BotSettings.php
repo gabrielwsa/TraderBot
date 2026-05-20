@@ -21,6 +21,8 @@ class BotSettings extends Component
     public bool $use_bnb_fees = false;
     public float $min_volume_usdt = 1000000;
     public float $min_volatility_pct = 1.0;
+    public bool $trailing_stop_enabled = true;
+    public float $trailing_stop_pct = 1.0;
     public string $timeframe = '15m';
 
     public bool $saved = false;
@@ -42,6 +44,8 @@ class BotSettings extends Component
         $this->use_bnb_fees = $s->use_bnb_fees;
         $this->min_volume_usdt = $s->min_volume_usdt;
         $this->min_volatility_pct = $s->min_volatility_pct ?? 1.0;
+        $this->trailing_stop_enabled = $s->trailing_stop_enabled ?? true;
+        $this->trailing_stop_pct = $s->trailing_stop_pct ?? 1.0;
         $this->timeframe = $s->timeframe;
         $this->blacklist = $s->pair_blacklist ?? [];
     }
@@ -87,6 +91,7 @@ class BotSettings extends Component
             'take_profit_pct'       => 'required|numeric|min:0.1|max:100',
             'min_volume_usdt'       => 'required|numeric|min:0',
             'min_volatility_pct'    => 'required|numeric|min:0|max:50',
+            'trailing_stop_pct'     => 'required|numeric|min:0.1|max:20',
             'environment'           => 'required|in:testnet,production',
             'timeframe'             => 'required|in:1m,5m,15m,1h',
         ]);
@@ -125,6 +130,8 @@ class BotSettings extends Component
             'use_bnb_fees'          => $this->use_bnb_fees,
             'min_volume_usdt'       => $this->min_volume_usdt,
             'min_volatility_pct'    => $this->min_volatility_pct,
+            'trailing_stop_enabled' => $this->trailing_stop_enabled,
+            'trailing_stop_pct'     => $this->trailing_stop_pct,
             'timeframe'             => $this->timeframe,
             'pair_blacklist'        => $this->blacklist ?: null,
         ]);

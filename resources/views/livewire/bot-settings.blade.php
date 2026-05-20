@@ -8,6 +8,7 @@ $tips = [
     'max_open_positions'    => 'Quantidade máxima de trades abertos ao mesmo tempo. O bot não abre novos trades se esse limite for atingido.',
     'stop_loss_pct'         => 'Percentual de queda máxima tolerada antes de vender automaticamente. Ex: 2% = vende se o preço cair 2% do ponto de entrada.',
     'take_profit_pct'       => 'Percentual de lucro alvo para fechar o trade automaticamente. Ex: 4% = vende ao atingir 4% de ganho.',
+    'trailing_stop_pct'     => 'Trailing stop move o stop loss automaticamente para cima conforme o preço sobe, travando o lucro. Ex: 1% = stop fica sempre 1% abaixo da máxima atingida.',
     'timeframe'             => 'Intervalo dos candles usados para calcular os indicadores (EMA, RSI, MACD). 15m é o mais usado para day trade.',
     'min_volume_usdt'       => 'Volume mínimo negociado em 24h para um par ser considerado. Filtra moedas sem liquidez — quanto maior, mais seguro.',
     'min_volatility_pct'    => 'Variação mínima de preço nas últimas 24h (valor absoluto). Ex: 1% exclui pares estáveis como EUR/USDT. Aumentar evita entrar em ativos sem movimento.',
@@ -172,6 +173,36 @@ $tips = [
                 </div>
                 <input wire:model.live="take_profit_pct" type="number" step="0.1" min="0.1"
                        class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+
+            {{-- Trailing Stop --}}
+            <div class="col-span-1 sm:col-span-2">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-sm text-gray-400">Trailing Stop</label>
+                        <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
+                            <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
+                            <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                                {{ $tips['trailing_stop_pct'] }}
+                            </div>
+                        </div>
+                    </div>
+                    <button wire:click="$set('trailing_stop_enabled', {{ $trailing_stop_enabled ? 'false' : 'true' }})"
+                            class="relative inline-flex h-5 w-9 items-center rounded-full transition {{ $trailing_stop_enabled ? 'bg-green-600' : 'bg-gray-700' }}">
+                        <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition {{ $trailing_stop_enabled ? 'translate-x-4' : 'translate-x-1' }}"></span>
+                    </button>
+                </div>
+                @if ($trailing_stop_enabled)
+                <div class="flex items-center gap-3">
+                    <input wire:model.live="trailing_stop_pct" type="number" step="0.1" min="0.1" max="20"
+                           class="w-full bg-gray-800 border border-yellow-900/50 rounded-lg px-4 py-2.5 text-yellow-300 text-sm focus:border-yellow-500 focus:outline-none" />
+                    <span class="text-gray-500 text-xs shrink-0">% abaixo da máxima</span>
+                </div>
+                @error('trailing_stop_pct') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                <p class="text-gray-600 text-xs mt-1">Quando preço subir, stop sobe junto — protege lucro automaticamente</p>
+                @else
+                <p class="text-gray-600 text-xs">Desativado — usa stop loss fixo configurado acima</p>
+                @endif
             </div>
 
             <div class="col-span-1 sm:col-span-2">
