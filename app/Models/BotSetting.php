@@ -10,7 +10,7 @@ class BotSetting extends Model
         'api_key', 'api_secret', 'environment', 'capital_usdt',
         'capital_per_trade_pct', 'max_open_positions', 'stop_loss_pct',
         'take_profit_pct', 'trailing_stop_enabled', 'trailing_stop_pct',
-        'use_bnb_fees', 'min_volume_usdt', 'min_volatility_pct', 'timeframe', 'is_active', 'pair_blacklist',
+        'use_bnb_fees', 'min_volume_usdt', 'min_volatility_pct', 'scan_limit', 'timeframe', 'is_active', 'pair_blacklist',
         'ai_enabled', 'ai_provider', 'ai_model', 'ai_base_url', 'ai_api_key',
     ];
 
@@ -25,6 +25,7 @@ class BotSetting extends Model
         'use_bnb_fees' => 'boolean',
         'min_volume_usdt' => 'float',
         'min_volatility_pct' => 'float',
+        'scan_limit' => 'integer',
         'is_active' => 'boolean',
         'pair_blacklist' => 'array',
         'ai_enabled'    => 'boolean',
@@ -44,6 +45,7 @@ class BotSetting extends Model
             'use_bnb_fees' => false,
             'min_volume_usdt' => 1000000,
             'min_volatility_pct' => 1.0,
+            'scan_limit' => 50,
             'timeframe' => '15m',
             'is_active'    => false,
             'ai_enabled'   => false,

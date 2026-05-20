@@ -12,6 +12,7 @@ $tips = [
     'timeframe'             => 'Intervalo dos candles usados para calcular os indicadores (EMA, RSI, MACD). 15m é o mais usado para day trade.',
     'min_volume_usdt'       => 'Volume mínimo negociado em 24h para um par ser considerado. Filtra moedas sem liquidez — quanto maior, mais seguro.',
     'min_volatility_pct'    => 'Variação mínima de preço nas últimas 24h (valor absoluto). Ex: 1% exclui pares estáveis como EUR/USDT. Aumentar evita entrar em ativos sem movimento.',
+    'scan_limit'            => 'Quantos pares o bot analisa por ciclo, ordenados por maior volume. Mais pares = mais oportunidades, porém ciclo mais lento. Recomendado: 50–150.',
     'use_bnb_fees'          => 'Se você tiver BNB na carteira, a Binance desconta as taxas em BNB com 25% de desconto (0.075% em vez de 0.1%).',
 ];
 @endphp
@@ -245,6 +246,26 @@ $tips = [
                 <p class="text-yellow-400 text-xs mt-1">⚠ Sem filtro de volatilidade — o bot pode entrar em pares estáveis como EUR/USDT.</p>
                 @elseif ($min_volatility_pct >= 5)
                 <p class="text-yellow-400 text-xs mt-1">⚠ Volatilidade muito alta — poucos pares serão considerados.</p>
+                @endif
+            </div>
+
+            <div class="col-span-1 sm:col-span-2">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <label class="text-sm text-gray-400">Pares no Scan</label>
+                    <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
+                        <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
+                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                            {{ $tips['scan_limit'] }}
+                        </div>
+                    </div>
+                </div>
+                <input wire:model.live="scan_limit" type="number" step="10" min="10" max="300"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+                @error('scan_limit') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                @if ($scan_limit <= 20)
+                <p class="text-yellow-400 text-xs mt-1">⚠ Poucos pares — pode perder boas oportunidades.</p>
+                @elseif ($scan_limit > 150)
+                <p class="text-yellow-400 text-xs mt-1">⚠ Muitos pares — o ciclo pode demorar mais para completar.</p>
                 @endif
             </div>
 
