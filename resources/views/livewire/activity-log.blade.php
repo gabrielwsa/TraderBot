@@ -2,7 +2,7 @@
     <div class="px-5 py-4 border-b border-gray-800">
         <h2 class="font-semibold text-white">Activity Log</h2>
     </div>
-    <div class="divide-y divide-gray-800 max-h-96 overflow-y-auto">
+    <div class="divide-y divide-gray-800 h-64 overflow-y-auto">
         @forelse ($logs as $log)
         <div class="px-5 py-2.5 flex gap-3 items-start">
             <span class="text-xs mt-0.5 shrink-0

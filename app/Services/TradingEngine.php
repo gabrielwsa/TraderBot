@@ -24,7 +24,20 @@ class TradingEngine
 
     public function runCycle(): void
     {
-        if (!$this->settings->is_active) return;
+        $hasOpenPositions = Position::open()->exists();
+
+        // When stopped, keep monitoring open positions (take profit only) until all are closed
+        if (!$this->settings->is_active) {
+            if ($hasOpenPositions) {
+                BotLog::info('Bot stopped — draining ' . Position::open()->count() . ' open position(s) at take profit');
+                try {
+                    $this->monitorPositions(takeProfitOnly: true);
+                } catch (Exception $e) {
+                    BotLog::error('Error draining positions: ' . $e->getMessage());
+                }
+            }
+            return;
+        }
 
         BotLog::info('Starting bot cycle');
 
@@ -36,7 +49,7 @@ class TradingEngine
         }
     }
 
-    public function monitorPositions(): void
+    public function monitorPositions(bool $takeProfitOnly = false): void
     {
         $openPositions = Position::open()->get();
 
@@ -45,15 +58,19 @@ class TradingEngine
                 $price = $this->binance->getPrice($position->pair);
                 $this->updatePositionPrice($position, $price);
 
-                if ($price <= $position->stop_loss_price) {
-                    BotLog::warning("Stop loss triggered for {$position->pair} at {$price}");
-                    $this->closePosition($position, 'stop_loss');
-                    continue;
-                }
-
                 if ($price >= $position->take_profit_price) {
                     BotLog::trade("Take profit triggered for {$position->pair} at {$price}");
                     $this->closePosition($position, 'take_profit');
+                    continue;
+                }
+
+                if ($takeProfitOnly) {
+                    continue;
+                }
+
+                if ($price <= $position->stop_loss_price) {
+                    BotLog::warning("Stop loss triggered for {$position->pair} at {$price}");
+                    $this->closePosition($position, 'stop_loss');
                     continue;
                 }
 
