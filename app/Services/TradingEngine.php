@@ -128,12 +128,19 @@ class TradingEngine
             if ($slots <= 0) break;
 
             try {
-                // Multi-timeframe: check 1h trend before analyzing 15m
+                // Multi-timeframe: 1D → 1h → 15m (all must be BULL)
+                $klines1d = $this->binance->getKlines($pair, '1d', 50);
+                $trend1d  = $this->indicators->trendDirection($klines1d);
+
+                if ($trend1d !== 'BULL') {
+                    continue;
+                }
+
                 $klines1h = $this->binance->getKlines($pair, '1h', 50);
                 $trend1h  = $this->indicators->trendDirection($klines1h);
 
                 if ($trend1h !== 'BULL') {
-                    continue; // Skip pairs not in an uptrend on 1h
+                    continue;
                 }
 
                 $klines   = $this->binance->getKlines($pair, $this->settings->timeframe, 100);
