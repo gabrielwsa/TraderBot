@@ -18,6 +18,8 @@ class WalletInfo extends Component
     public ?string $lastChecked = null;
     public bool $checking = false;
     public bool $hasApiKeys = false;
+    public float $usdtBalance = 0;
+    public bool $lowUsdtWarning = false;
 
     public function mount(): void
     {
@@ -56,6 +58,11 @@ class WalletInfo extends Component
                 $this->makerFee = $wallet['maker_commission'];
                 $this->takerFee = $wallet['taker_commission'];
                 $this->accountType = $wallet['account_type'];
+
+                $this->usdtBalance = collect($this->balances)
+                    ->whereIn('asset', ['USDT', 'USD'])
+                    ->sum('free');
+                $this->lowUsdtWarning = $this->usdtBalance < 10;
             } catch (\Exception $e) {
                 $this->connectionMessage = $e->getMessage();
                 $this->connected = false;

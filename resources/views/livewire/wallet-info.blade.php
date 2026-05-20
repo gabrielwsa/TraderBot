@@ -57,6 +57,17 @@
             @endif
         </div>
 
+        @if ($connected && $lowUsdtWarning)
+            <div class="px-5 py-2.5 bg-yellow-950/40 border-b border-yellow-900/40 flex items-center gap-2">
+                <svg class="w-4 h-4 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <span class="text-yellow-300 text-xs">
+                    Saldo USDT insuficiente ({{ number_format($usdtBalance, 2) }} USDT) — mínimo de ordem na Binance é 10 USDT.
+                </span>
+            </div>
+        @endif
+
         @if ($connected)
             {{-- Account info row --}}
             <div class="px-5 py-2.5 border-b border-gray-800 grid grid-cols-3 gap-4 text-xs">
