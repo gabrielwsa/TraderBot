@@ -144,6 +144,32 @@ Exemplo: 10 USDT × 100% = 10 USDT ✓
 
 ---
 
+## Bot compra pares da blacklist mesmo após salvar configurações
+
+**Sintoma**
+O bot abre posição em um par que está na blacklist, logo após você ter salvo as configurações.
+
+**Causa**
+O queue worker é um processo de longa duração. Se um ciclo do bot já estava em execução quando você salvou, ele usou as configurações antigas até o fim daquele ciclo. Além disso, qualquer alteração de código só entra em vigor após reiniciar o worker.
+
+**Solução**
+Sempre que salvar configurações importantes (blacklist, volatilidade), reinicie o worker:
+```bash
+docker compose restart queue
+```
+
+Se uma posição indevida já foi aberta, feche manualmente pelo tinker:
+```bash
+docker compose exec app php artisan tinker
+```
+```php
+use App\Models\Position;
+$p = Position::where('pair', 'BTCUSDT')->where('status', 'open')->first();
+$p->update(['status' => 'closed', 'close_reason' => 'manual', 'close_price' => $p->current_price]);
+```
+
+---
+
 ## Arquivos criados no container pertencem ao root
 
 **Sintoma**

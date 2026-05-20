@@ -61,33 +61,40 @@
     <div class="bg-gray-900 border rounded-xl overflow-hidden {{ $this->settings->is_active ? 'border-green-900' : 'border-gray-700' }}">
 
         {{-- Active indicator strip --}}
-        @if ($this->settings->is_active)
-        <div class="bg-green-950/40 border-b border-green-900/50 px-5 py-2 flex items-center gap-3">
+        @php $active = $this->settings->is_active; @endphp
+        <div class="{{ $active ? 'bg-green-950/40 border-green-900/50' : 'bg-gray-800/40 border-gray-700/50' }} border-b px-5 py-2 flex items-center gap-3">
             <div class="relative flex items-center justify-center w-4 h-4 shrink-0">
-                <span class="absolute w-full h-full rounded-full bg-green-400 opacity-30 animate-ping"></span>
-                <span class="relative w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                @if ($active)
+                    <span class="absolute w-full h-full rounded-full bg-green-400 opacity-30 animate-ping"></span>
+                    <span class="relative w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                @else
+                    <span class="relative w-2.5 h-2.5 rounded-full bg-gray-600"></span>
+                @endif
             </div>
             <div class="flex items-center gap-2 text-sm overflow-hidden flex-1">
-                @if ($this->openPositions > 0)
-                    <span class="text-green-300 font-medium shrink-0">
-                        Monitorando {{ $this->openPositions }} {{ $this->openPositions === 1 ? 'posição' : 'posições' }}
+                @if ($active)
+                    @if ($this->openPositions > 0)
+                        <span class="text-green-300 font-medium shrink-0">
+                            Monitorando {{ $this->openPositions }} {{ $this->openPositions === 1 ? 'posição' : 'posições' }}
+                        </span>
+                        <span class="text-green-900">•</span>
+                    @endif
+                    <span class="text-green-700">Escaneando mercados</span>
+                    <span class="flex gap-0.5 items-end h-3 shrink-0">
+                        <span class="w-0.5 bg-green-600 rounded-full" style="height:40%;animation:bounce 1s ease-in-out infinite"></span>
+                        <span class="w-0.5 bg-green-600 rounded-full" style="height:70%;animation:bounce 1s ease-in-out 0.15s infinite"></span>
+                        <span class="w-0.5 bg-green-500 rounded-full" style="height:100%;animation:bounce 1s ease-in-out 0.3s infinite"></span>
+                        <span class="w-0.5 bg-green-600 rounded-full" style="height:70%;animation:bounce 1s ease-in-out 0.15s infinite"></span>
+                        <span class="w-0.5 bg-green-600 rounded-full" style="height:40%;animation:bounce 1s ease-in-out infinite"></span>
                     </span>
-                    <span class="text-green-900">•</span>
+                @else
+                    <span class="text-gray-600">Bot pausado</span>
                 @endif
-                <span class="text-green-700">Escaneando mercados</span>
-                <span class="flex gap-0.5 items-end h-3 shrink-0">
-                    <span class="w-0.5 bg-green-600 rounded-full" style="height:40%;animation:bounce 1s ease-in-out infinite"></span>
-                    <span class="w-0.5 bg-green-600 rounded-full" style="height:70%;animation:bounce 1s ease-in-out 0.15s infinite"></span>
-                    <span class="w-0.5 bg-green-500 rounded-full" style="height:100%;animation:bounce 1s ease-in-out 0.3s infinite"></span>
-                    <span class="w-0.5 bg-green-600 rounded-full" style="height:70%;animation:bounce 1s ease-in-out 0.15s infinite"></span>
-                    <span class="w-0.5 bg-green-600 rounded-full" style="height:40%;animation:bounce 1s ease-in-out infinite"></span>
-                </span>
             </div>
-            @if ($this->lastActivity)
+            @if ($active && $this->lastActivity)
             <span class="text-green-900 text-xs shrink-0">último ciclo {{ $this->lastActivity }}</span>
             @endif
         </div>
-        @endif
 
         {{-- Control row --}}
         <div class="px-5 py-3 flex items-center gap-4">
