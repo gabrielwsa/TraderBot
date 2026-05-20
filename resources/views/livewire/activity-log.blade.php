@@ -1,4 +1,4 @@
-<div class="bg-gray-900 rounded-xl border border-gray-800 h-full">
+<div class="bg-gray-900 rounded-xl border border-gray-800 h-full" wire:poll.3s>
     <div class="px-5 py-4 border-b border-gray-800">
         <h2 class="font-semibold text-white">Activity Log</h2>
     </div>
