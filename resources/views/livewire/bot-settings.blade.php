@@ -94,7 +94,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="capital_usdt" type="number" step="0.01"
+                <input wire:model.live="capital_usdt" type="number" step="0.01"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
                 @error('capital_usdt') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
             </div>
@@ -109,7 +109,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="capital_per_trade_pct" type="number" step="0.1" min="1" max="100"
+                <input wire:model.live="capital_per_trade_pct" type="number" step="0.1" min="1" max="100"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
@@ -123,7 +123,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="max_open_positions" type="number" min="1" max="20"
+                <input wire:model.live="max_open_positions" type="number" min="1" max="20"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
@@ -155,7 +155,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="stop_loss_pct" type="number" step="0.1" min="0.1"
+                <input wire:model.live="stop_loss_pct" type="number" step="0.1" min="0.1"
                        class="w-full bg-gray-800 border border-red-900/50 rounded-lg px-4 py-2.5 text-red-300 text-sm focus:border-red-500 focus:outline-none" />
             </div>
 
@@ -169,7 +169,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model="take_profit_pct" type="number" step="0.1" min="0.1"
+                <input wire:model.live="take_profit_pct" type="number" step="0.1" min="0.1"
                        class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
@@ -207,19 +207,53 @@ $tips = [
     </div>
 
     {{-- Risk summary --}}
+    @php
+        $tradeValue     = $capital_usdt * ($capital_per_trade_pct / 100);
+        $totalExposure  = $tradeValue * $max_open_positions;
+        $belowMinOrder  = $tradeValue < 10;
+        $exceedsBalance = $totalExposure > $capital_usdt;
+    @endphp
+
+    {{-- Warnings --}}
+    @if ($belowMinOrder || $exceedsBalance)
+    <div class="mb-4 space-y-2">
+        @if ($belowMinOrder)
+        <div class="flex items-start gap-2 bg-red-950/40 border border-red-900/50 rounded-lg px-4 py-3">
+            <svg class="w-4 h-4 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <span class="text-red-300 text-xs">
+                Valor por operação <strong>{{ number_format($tradeValue, 2) }} USDT</strong> está abaixo do mínimo de ordem da Binance (10 USDT). As ordens serão rejeitadas.
+            </span>
+        </div>
+        @endif
+
+        @if ($exceedsBalance)
+        <div class="flex items-start gap-2 bg-yellow-950/40 border border-yellow-900/50 rounded-lg px-4 py-3">
+            <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <span class="text-yellow-300 text-xs">
+                Exposição total com {{ $max_open_positions }} posições simultâneas seria <strong>{{ number_format($totalExposure, 2) }} USDT</strong>, mas o capital configurado é <strong>{{ number_format($capital_usdt, 2) }} USDT</strong>. As posições além do saldo vão falhar. Reduza as posições simultâneas para <strong>{{ $tradeValue > 0 ? floor($capital_usdt / $tradeValue) : 1 }}</strong>.
+            </span>
+        </div>
+        @endif
+    </div>
+    @endif
+
     <div class="border border-gray-800 rounded-lg p-4 bg-gray-800/30 text-xs text-gray-500 mb-6 space-y-1">
         <div class="text-gray-400 font-medium mb-2">Resumo de risco por trade</div>
         <div class="flex justify-between">
             <span>Valor por operação</span>
-            <span class="text-white">{{ number_format($capital_usdt * ($capital_per_trade_pct / 100), 2) }} USDT</span>
+            <span class="text-white">{{ number_format($tradeValue, 2) }} USDT</span>
         </div>
         <div class="flex justify-between">
             <span>Perda máxima por trade</span>
-            <span class="text-red-400">-{{ number_format($capital_usdt * ($capital_per_trade_pct / 100) * ($stop_loss_pct / 100), 2) }} USDT</span>
+            <span class="text-red-400">-{{ number_format($tradeValue * ($stop_loss_pct / 100), 2) }} USDT</span>
         </div>
         <div class="flex justify-between">
             <span>Ganho alvo por trade</span>
-            <span class="text-green-400">+{{ number_format($capital_usdt * ($capital_per_trade_pct / 100) * ($take_profit_pct / 100), 2) }} USDT</span>
+            <span class="text-green-400">+{{ number_format($tradeValue * ($take_profit_pct / 100), 2) }} USDT</span>
         </div>
         <div class="flex justify-between border-t border-gray-700 pt-1 mt-1">
             <span>Risco/Retorno</span>
