@@ -21,7 +21,7 @@ class BinanceService
 
     public function getKlines(string $symbol, string $interval, int $limit = 100): array
     {
-        $response = Http::get("{$this->baseUrl}/api/v3/klines", [
+        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/klines", [
             'symbol' => $symbol,
             'interval' => $interval,
             'limit' => $limit,
@@ -41,7 +41,7 @@ class BinanceService
 
     public function getTopUsdtPairs(float $minVolume, int $limit = 30): array
     {
-        $response = Http::get("{$this->baseUrl}/api/v3/ticker/24hr");
+        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/ticker/24hr");
         $this->assertSuccess($response);
 
         return collect($response->json())
@@ -60,7 +60,7 @@ class BinanceService
 
     public function getPrice(string $symbol): float
     {
-        $response = Http::get("{$this->baseUrl}/api/v3/ticker/price", ['symbol' => $symbol]);
+        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/ticker/price", ['symbol' => $symbol]);
         $this->assertSuccess($response);
         return (float) $response->json('price');
     }
@@ -112,6 +112,8 @@ class BinanceService
 
             $this->signedGet('/api/v3/account');
             return ['ok' => true, 'message' => 'Conectado com sucesso'];
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return ['ok' => false, 'message' => 'Timeout — API não respondeu em 10s'];
         } catch (\Exception $e) {
             $msg = $e->getMessage();
             if (str_contains($msg, '-2014') || str_contains($msg, 'API-key')) {
@@ -126,7 +128,7 @@ class BinanceService
 
     public function getLotSizeFilter(string $symbol): array
     {
-        $response = Http::get("{$this->baseUrl}/api/v3/exchangeInfo", ['symbol' => $symbol]);
+        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/exchangeInfo", ['symbol' => $symbol]);
         $this->assertSuccess($response);
 
         $filters = collect($response->json('symbols.0.filters') ?? []);
@@ -173,7 +175,7 @@ class BinanceService
         $query = http_build_query($params);
         $params['signature'] = hash_hmac('sha256', $query, $this->apiSecret);
 
-        $response = Http::withHeaders(['X-MBX-APIKEY' => $this->apiKey])
+        $response = Http::timeout(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
             ->get("{$this->baseUrl}{$path}", $params);
 
         $this->assertSuccess($response);
@@ -186,7 +188,7 @@ class BinanceService
         $query = http_build_query($params);
         $params['signature'] = hash_hmac('sha256', $query, $this->apiSecret);
 
-        $response = Http::withHeaders(['X-MBX-APIKEY' => $this->apiKey])
+        $response = Http::timeout(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
             ->asForm()
             ->post("{$this->baseUrl}{$path}", $params);
 

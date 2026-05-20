@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\BotLog;
 use App\Models\BotSetting;
+use App\Services\BinanceService;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -51,6 +52,28 @@ class BotSettings extends Component
             'environment'           => 'required|in:testnet,production',
             'timeframe'             => 'required|in:1m,5m,15m,1h',
         ]);
+
+        // Validate capital against real balance when API keys are provided
+        if (!empty($this->api_key) && !empty($this->api_secret)) {
+            try {
+                $tempSettings = BotSetting::current();
+                $tempSettings->api_key = $this->api_key;
+                $tempSettings->api_secret = $this->api_secret;
+                $tempSettings->environment = $this->environment;
+
+                $wallet  = (new BinanceService($tempSettings))->getWalletInfo();
+                $balance = collect($wallet['balances'])
+                    ->whereIn('asset', ['USDT', 'USD'])
+                    ->sum('free');
+
+                if ($this->capital_usdt > $balance) {
+                    $this->addError('capital_usdt', "Capital maior que o saldo disponível ({$balance} USDT).");
+                    return;
+                }
+            } catch (\Exception $e) {
+                // If we can't fetch the balance, skip this validation
+            }
+        }
 
         BotSetting::current()->update([
             'api_key'               => $this->api_key ?: null,

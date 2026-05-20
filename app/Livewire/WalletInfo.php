@@ -23,6 +23,10 @@ class WalletInfo extends Component
     {
         $settings = BotSetting::current();
         $this->hasApiKeys = !empty($settings->api_key) && !empty($settings->api_secret);
+
+        if ($this->hasApiKeys) {
+            $this->check();
+        }
     }
 
     public function check(): void
@@ -52,12 +56,13 @@ class WalletInfo extends Component
                 $this->makerFee = $wallet['maker_commission'];
                 $this->takerFee = $wallet['taker_commission'];
                 $this->accountType = $wallet['account_type'];
-                $this->lastChecked = now()->format('H:i:s');
             } catch (\Exception $e) {
                 $this->connectionMessage = $e->getMessage();
+                $this->connected = false;
             }
         }
 
+        $this->lastChecked = now()->format('H:i:s');
         $this->checking = false;
     }
 
