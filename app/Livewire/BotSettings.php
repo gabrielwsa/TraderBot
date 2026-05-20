@@ -24,6 +24,11 @@ class BotSettings extends Component
     public bool $trailing_stop_enabled = true;
     public float $trailing_stop_pct = 1.0;
     public string $timeframe = '15m';
+    public bool $ai_enabled = false;
+    public string $ai_provider = 'ollama';
+    public string $ai_model = 'llama3.1';
+    public string $ai_base_url = 'http://localhost:11434';
+    public string $ai_api_key = '';
 
     public bool $saved = false;
     public array $blacklist = [];
@@ -47,6 +52,11 @@ class BotSettings extends Component
         $this->trailing_stop_enabled = $s->trailing_stop_enabled ?? true;
         $this->trailing_stop_pct = $s->trailing_stop_pct ?? 1.0;
         $this->timeframe = $s->timeframe;
+        $this->ai_enabled  = $s->ai_enabled ?? false;
+        $this->ai_provider = $s->ai_provider ?? 'ollama';
+        $this->ai_model    = $s->ai_model ?? 'llama3.1';
+        $this->ai_base_url = $s->ai_base_url ?? 'http://localhost:11434';
+        $this->ai_api_key  = $s->ai_api_key ?? '';
         $this->blacklist = $s->pair_blacklist ?? [];
     }
 
@@ -92,6 +102,8 @@ class BotSettings extends Component
             'min_volume_usdt'       => 'required|numeric|min:0',
             'min_volatility_pct'    => 'required|numeric|min:0|max:50',
             'trailing_stop_pct'     => 'required|numeric|min:0.1|max:20',
+            'ai_provider'           => 'required|in:ollama,claude,openai',
+            'ai_model'              => 'required|string|max:100',
             'environment'           => 'required|in:testnet,production',
             'timeframe'             => 'required|in:1m,5m,15m,1h',
         ]);
@@ -133,6 +145,11 @@ class BotSettings extends Component
             'trailing_stop_enabled' => $this->trailing_stop_enabled,
             'trailing_stop_pct'     => $this->trailing_stop_pct,
             'timeframe'             => $this->timeframe,
+            'ai_enabled'            => $this->ai_enabled,
+            'ai_provider'           => $this->ai_provider,
+            'ai_model'              => $this->ai_model,
+            'ai_base_url'           => $this->ai_base_url ?: 'http://localhost:11434',
+            'ai_api_key'            => $this->ai_api_key ?: null,
             'pair_blacklist'        => $this->blacklist ?: null,
         ]);
 

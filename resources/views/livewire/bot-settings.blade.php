@@ -356,6 +356,65 @@ $tips = [
     </div>
     @endif
 
+    {{-- IA --}}
+    <div class="border border-gray-700 rounded-xl p-4 mb-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="text-sm font-medium text-white">Análise por IA</div>
+                <div class="text-xs text-gray-500 mt-0.5">Valida cada sinal BUY antes de executar. REJECT bloqueia a entrada.</div>
+            </div>
+            <button wire:click="$set('ai_enabled', {{ $ai_enabled ? 'false' : 'true' }})"
+                    class="relative inline-flex h-5 w-9 items-center rounded-full transition {{ $ai_enabled ? 'bg-green-600' : 'bg-gray-700' }}">
+                <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition {{ $ai_enabled ? 'translate-x-4' : 'translate-x-1' }}"></span>
+            </button>
+        </div>
+
+        @if ($ai_enabled)
+        <div class="space-y-3">
+            {{-- Provider --}}
+            <div>
+                <label class="text-xs text-gray-400 mb-1 block">Provider</label>
+                <select wire:model.live="ai_provider"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none">
+                    <option value="ollama">Ollama — local (Llama, Mistral, etc.)</option>
+                    <option value="claude">Claude — Anthropic API</option>
+                    <option value="openai">OpenAI — GPT API</option>
+                </select>
+            </div>
+
+            {{-- Model --}}
+            <div>
+                <label class="text-xs text-gray-400 mb-1 block">Modelo</label>
+                <input wire:model="ai_model" type="text"
+                       placeholder="{{ $ai_provider === 'ollama' ? 'llama3.1' : ($ai_provider === 'claude' ? 'claude-haiku-4-5-20251001' : 'gpt-4o-mini') }}"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+
+            @if ($ai_provider === 'ollama')
+            <div>
+                <label class="text-xs text-gray-400 mb-1 block">URL do Ollama</label>
+                <input wire:model="ai_base_url" type="text" placeholder="http://localhost:11434"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+                <p class="text-gray-600 text-xs mt-1">Ollama deve estar rodando com <code class="text-gray-400">ollama serve</code> e o modelo baixado com <code class="text-gray-400">ollama pull llama3.1</code></p>
+            </div>
+            @else
+            <div>
+                <label class="text-xs text-gray-400 mb-1 block">API Key</label>
+                <input wire:model="ai_api_key" type="password"
+                       placeholder="{{ $ai_provider === 'claude' ? 'sk-ant-...' : 'sk-...' }}"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+            @endif
+
+            <div class="bg-gray-800/60 rounded-lg px-3 py-2 text-xs text-gray-500 space-y-0.5">
+                <div><span class="text-green-400">CONFIRM</span> — IA aprova, trade executado</div>
+                <div><span class="text-gray-400">NEUTRAL</span> — IA sem opinião, trade executado</div>
+                <div><span class="text-red-400">REJECT</span> — IA rejeita, trade bloqueado + log</div>
+            </div>
+        </div>
+        @endif
+    </div>
+
     <div class="border border-gray-700 rounded-lg p-4 bg-gray-800/30 text-xs text-gray-400 mb-6 space-y-1">
         <div class="text-gray-400 font-medium mb-2">Resumo de risco por trade</div>
         <div class="flex justify-between">

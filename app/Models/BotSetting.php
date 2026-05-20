@@ -11,6 +11,7 @@ class BotSetting extends Model
         'capital_per_trade_pct', 'max_open_positions', 'stop_loss_pct',
         'take_profit_pct', 'trailing_stop_enabled', 'trailing_stop_pct',
         'use_bnb_fees', 'min_volume_usdt', 'min_volatility_pct', 'timeframe', 'is_active', 'pair_blacklist',
+        'ai_enabled', 'ai_provider', 'ai_model', 'ai_base_url', 'ai_api_key',
     ];
 
     protected $casts = [
@@ -26,6 +27,7 @@ class BotSetting extends Model
         'min_volatility_pct' => 'float',
         'is_active' => 'boolean',
         'pair_blacklist' => 'array',
+        'ai_enabled'    => 'boolean',
     ];
 
     public static function current(): self
@@ -43,7 +45,11 @@ class BotSetting extends Model
             'min_volume_usdt' => 1000000,
             'min_volatility_pct' => 1.0,
             'timeframe' => '15m',
-            'is_active' => false,
+            'is_active'    => false,
+            'ai_enabled'   => false,
+            'ai_provider'  => 'ollama',
+            'ai_model'     => 'llama3.1',
+            'ai_base_url'  => 'http://localhost:11434',
         ]);
     }
 

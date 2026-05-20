@@ -8,18 +8,21 @@ use App\Models\Position;
 use App\Models\Signal;
 use App\Models\Trade;
 use Exception;
+use App\Services\AiAnalysisService;
 
 class TradingEngine
 {
     private BotSetting $settings;
     private BinanceService $binance;
     private IndicatorService $indicators;
+    private AiAnalysisService $ai;
 
     public function __construct()
     {
-        $this->settings = BotSetting::current();
-        $this->binance = new BinanceService($this->settings);
+        $this->settings   = BotSetting::current();
+        $this->binance    = new BinanceService($this->settings);
         $this->indicators = new IndicatorService();
+        $this->ai         = new AiAnalysisService($this->settings);
     }
 
     public function runCycle(): void
@@ -154,7 +157,24 @@ class TradingEngine
 
                 if ($analysis['signal'] === 'BUY') {
                     $volLabel = $analysis['volume_ok'] ? 'volume OK' : 'low volume';
-                    BotLog::trade("BUY signal for {$pair} [1h:{$trend1h}, {$volLabel}]: " . implode(', ', $analysis['reasons']));
+
+                    // AI validation (if enabled)
+                    $aiResult = $this->ai->validateSignal($pair, $analysis, $trend1h, $this->settings->timeframe);
+
+                    if (!$aiResult['proceed']) {
+                        BotLog::warning("BUY {$pair} REJEITADO pela IA [{$aiResult['decision']} {$aiResult['confidence']}%]: {$aiResult['reason']}");
+                        $savedSignal->update(['skip_reason' => "IA rejeitou: {$aiResult['reason']}"]);
+                        continue;
+                    }
+
+                    $aiLabel = match($aiResult['decision']) {
+                        'CONFIRM'  => "IA confirmou ({$aiResult['confidence']}%)",
+                        'NEUTRAL'  => 'IA neutro',
+                        'DISABLED' => '',
+                        default    => '',
+                    };
+
+                    BotLog::trade("BUY signal for {$pair} [1h:{$trend1h}, {$volLabel}" . ($aiLabel ? ", {$aiLabel}" : "") . "]: " . implode(', ', $analysis['reasons']));
                     $this->openPosition($pair, $analysis, $savedSignal);
                     $slots--;
                 }
