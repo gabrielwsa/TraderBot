@@ -25,13 +25,12 @@ class TradingEngine
         $this->ai         = new AiAnalysisService($this->settings);
     }
 
-    public function runCycle(): void
+    public function runMonitor(): void
     {
-        $hasOpenPositions = Position::open()->exists();
+        $this->settings->refresh();
 
         if (!$this->settings->is_active) {
-            if ($hasOpenPositions) {
-                BotLog::info('Bot stopped — draining ' . Position::open()->count() . ' open position(s) at take profit');
+            if (Position::open()->exists()) {
                 try {
                     $this->monitorPositions(takeProfitOnly: true);
                 } catch (Exception $e) {
@@ -41,10 +40,22 @@ class TradingEngine
             return;
         }
 
+        try {
+            $this->monitorPositions();
+        } catch (Exception $e) {
+            BotLog::error('Monitor failed: ' . $e->getMessage());
+        }
+    }
+
+    public function runCycle(): void
+    {
+        if (!$this->settings->is_active) {
+            return;
+        }
+
         BotLog::info('Starting bot cycle');
 
         try {
-            $this->monitorPositions();
             $this->scanAndTrade();
         } catch (Exception $e) {
             BotLog::error('Bot cycle failed: ' . $e->getMessage());

@@ -1,4 +1,4 @@
-<div class="bg-gray-900 rounded-xl border border-gray-700 h-full" wire:poll.4s
+<div class="bg-gray-900 rounded-xl border border-gray-700 h-full" wire:poll.2s
      x-data="{ confirm: false, posId: null, posPair: null, posPnl: null, posPnlPositive: true }"
      @keydown.escape.window="confirm = false">
 

@@ -158,7 +158,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model.live="stop_loss_pct" type="number" step="0.1" min="0.1"
+                <input wire:model.live="stop_loss_pct" type="text" inputmode="decimal"
                        class="w-full bg-gray-800 border border-red-900/50 rounded-lg px-4 py-2.5 text-red-300 text-sm focus:border-red-500 focus:outline-none" />
             </div>
 
@@ -172,7 +172,7 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model.live="take_profit_pct" type="number" step="0.1" min="0.1"
+                <input wire:model.live="take_profit_pct" type="text" inputmode="decimal"
                        class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
             </div>
 
@@ -195,7 +195,7 @@ $tips = [
                 </div>
                 @if ($trailing_stop_enabled)
                 <div class="flex items-center gap-3">
-                    <input wire:model.live="trailing_stop_pct" type="number" step="0.1" min="0.1" max="20"
+                    <input wire:model.live="trailing_stop_pct" type="text" inputmode="decimal"
                            class="w-full bg-gray-800 border border-yellow-900/50 rounded-lg px-4 py-2.5 text-yellow-300 text-sm focus:border-yellow-500 focus:outline-none" />
                     <span class="text-gray-500 text-xs shrink-0">% abaixo da máxima</span>
                 </div>

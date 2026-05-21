@@ -41,7 +41,7 @@ class BinanceService
 
     public function getTopUsdtPairs(float $minVolume, int $limit = 30, float $minVolatilityPct = 0): array
     {
-        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/ticker/24hr");
+        $response = Http::timeout(30)->get("{$this->baseUrl}/api/v3/ticker/24hr");
         $this->assertSuccess($response);
 
         return collect($response->json())
