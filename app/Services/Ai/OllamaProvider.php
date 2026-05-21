@@ -61,6 +61,13 @@ Technical Indicators:
 
 Signal reasons: {$data['reasons']}
 
+Market Context:
+- BTC 1h trend: {$data['btc_trend_1h']} (macro direction — prefer BULL or NEUTRAL)
+- Fear & Greed index: {$data['fear_greed_value']}/100 ({$data['fear_greed_label']}) (0=extreme fear, 100=extreme greed; best entries at 20-60)
+- Orderbook bid/ask ratio: {$data['orderbook_ratio']} (>1.0 = buy pressure, <1.0 = sell pressure)
+- Funding rate: {$data['funding_rate']} (very positive = overleveraged longs, risk of flush)
+- 24h price change: {$data['price_change_24h']} (momentum context)
+
 Respond ONLY with valid JSON like this:
 {"decision": "CONFIRM", "reason": "brief reason max 15 words", "confidence": 75}
 

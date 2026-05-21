@@ -9,6 +9,7 @@ use App\Models\Signal;
 use App\Models\Trade;
 use Exception;
 use App\Services\AiAnalysisService;
+use App\Services\MarketSentimentService;
 
 class TradingEngine
 {
@@ -136,6 +137,16 @@ class TradingEngine
 
         BotLog::info('Scanning ' . count($pairs) . ' pairs');
 
+        // Macro context fetched once, shared across all pairs in this cycle
+        try {
+            $btcKlines  = $this->binance->getKlines('BTCUSDT', '1h', 50);
+            $btcTrend1h = $this->indicators->trendDirection($btcKlines);
+        } catch (Exception) {
+            $btcTrend1h = 'NEUTRAL';
+        }
+
+        $fearGreed = (new MarketSentimentService())->getFearAndGreed();
+
         $slots = $this->settings->max_open_positions - $openCount;
 
         foreach ($pairs as $pair) {
@@ -169,8 +180,19 @@ class TradingEngine
                 if ($analysis['signal'] === 'BUY') {
                     $volLabel = $analysis['volume_ok'] ? 'volume OK' : 'low volume';
 
+                    // Per-pair context for AI (only fetched on actual BUY signal)
+                    $orderbook = $this->binance->getOrderbookPressure($pair);
+                    $aiContext  = [
+                        'btc_trend_1h'     => $btcTrend1h,
+                        'fear_greed_value' => $fearGreed['value'],
+                        'fear_greed_label' => $fearGreed['label'],
+                        'orderbook_ratio'  => $orderbook['ratio'],
+                        'funding_rate'     => $this->binance->getFundingRate($pair),
+                        'price_change_24h' => round($this->binance->get24hChange($pair), 2),
+                    ];
+
                     // AI validation (if enabled)
-                    $aiResult = $this->ai->validateSignal($pair, $analysis, $trend1h, $this->settings->timeframe);
+                    $aiResult = $this->ai->validateSignal($pair, $analysis, $trend1h, $this->settings->timeframe, $aiContext);
 
                     if (!$aiResult['proceed']) {
                         BotLog::warning("BUY {$pair} REJEITADO pela IA [{$aiResult['decision']} {$aiResult['confidence']}%]: {$aiResult['reason']}");

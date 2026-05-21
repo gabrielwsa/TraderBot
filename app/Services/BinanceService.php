@@ -149,6 +149,41 @@ class BinanceService
         ];
     }
 
+    public function getOrderbookPressure(string $symbol): array
+    {
+        try {
+            $response = Http::timeout(5)->get("{$this->baseUrl}/api/v3/depth", ['symbol' => $symbol, 'limit' => 20]);
+            if ($response->failed()) return ['available' => false, 'ratio' => 1.0];
+            $bids  = collect($response->json('bids', []))->sum(fn($b) => (float) $b[1]);
+            $asks  = collect($response->json('asks', []))->sum(fn($a) => (float) $a[1]);
+            return ['available' => true, 'ratio' => $asks > 0 ? round($bids / $asks, 3) : 1.0];
+        } catch (\Exception) {
+            return ['available' => false, 'ratio' => 1.0];
+        }
+    }
+
+    public function getFundingRate(string $symbol): ?float
+    {
+        try {
+            $response = Http::timeout(5)->get('https://fapi.binance.com/fapi/v1/premiumIndex', ['symbol' => $symbol]);
+            if ($response->failed()) return null;
+            return (float) $response->json('lastFundingRate', 0);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    public function get24hChange(string $symbol): float
+    {
+        try {
+            $response = Http::timeout(5)->get("{$this->baseUrl}/api/v3/ticker/24hr", ['symbol' => $symbol]);
+            if ($response->failed()) return 0.0;
+            return (float) $response->json('priceChangePercent', 0);
+        } catch (\Exception) {
+            return 0.0;
+        }
+    }
+
     public function placeBuyOrder(string $symbol, float $quoteQty): array
     {
         return $this->signedPost('/api/v3/order', [

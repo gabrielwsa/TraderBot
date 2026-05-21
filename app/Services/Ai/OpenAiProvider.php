@@ -50,6 +50,11 @@ BB %B: {$data['bb_pct_b']} | StochRSI K/D: {$data['stoch_k']}/{$data['stoch_d']}
 ATR: {$data['atr']} | 1h Trend: {$data['trend_1h']} | Volume spike: {$data['volume_ok']}
 Reasons: {$data['reasons']}
 
+Market Context:
+BTC 1h trend: {$data['btc_trend_1h']} | Fear & Greed: {$data['fear_greed_value']}/100 ({$data['fear_greed_label']})
+Orderbook ratio: {$data['orderbook_ratio']} (>1=buy pressure) | Funding rate: {$data['funding_rate']}
+24h price change: {$data['price_change_24h']}
+
 JSON response: {"decision": "CONFIRM|REJECT|NEUTRAL", "reason": "max 15 words", "confidence": 0-100}
 PROMPT;
     }

@@ -348,6 +348,11 @@ $tips = [
         $totalExposure  = $tradeValue * $max_open_positions;
         $belowMinOrder  = $tradeValue < 10;
         $exceedsBalance = $totalExposure > $capital_usdt;
+        $feeRate        = $use_bnb_fees ? 0.00075 : 0.001;
+        $feesTotal      = $tradeValue * $feeRate * 2;
+        $netLoss        = $tradeValue * ($stop_loss_pct / 100) + $feesTotal;
+        $netGain        = $tradeValue * ($take_profit_pct / 100) - $feesTotal;
+        $netRatio       = $netLoss > 0 ? $netGain / $netLoss : 0;
 
         // Trade frequency score
         $freqScore = 0;
@@ -474,16 +479,23 @@ $tips = [
             <span class="text-white">{{ number_format($tradeValue, 2) }} USDT</span>
         </div>
         <div class="flex justify-between">
-            <span>Perda máxima por trade</span>
-            <span class="text-red-400">-{{ number_format($tradeValue * ($stop_loss_pct / 100), 2) }} USDT</span>
+            <span>Taxas (compra + venda)</span>
+            <span class="text-gray-400">-{{ number_format($feesTotal, 4) }} USDT ({{ $use_bnb_fees ? '0.075%' : '0.1%' }} × 2)</span>
         </div>
         <div class="flex justify-between">
-            <span>Ganho alvo por trade</span>
-            <span class="text-green-400">+{{ number_format($tradeValue * ($take_profit_pct / 100), 2) }} USDT</span>
+            <span>Perda máxima líquida</span>
+            <span class="text-red-400">-{{ number_format($netLoss, 4) }} USDT</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Ganho alvo líquido</span>
+            <span class="{{ $netGain > 0 ? 'text-green-400' : 'text-red-400' }}">{{ $netGain >= 0 ? '+' : '' }}{{ number_format($netGain, 4) }} USDT</span>
         </div>
         <div class="flex justify-between border-t border-gray-700 pt-1 mt-1">
-            <span>Risco/Retorno</span>
-            <span class="text-gray-300">1 : {{ $stop_loss_pct > 0 ? number_format($take_profit_pct / $stop_loss_pct, 1) : '—' }}</span>
+            <span>Risco/Retorno líquido</span>
+            <span class="{{ $netRatio >= 1 ? 'text-green-400' : 'text-yellow-400' }}">
+                1 : {{ number_format($netRatio, 2) }}
+                @if ($netRatio < 1) ⚠ @endif
+            </span>
         </div>
         <div class="border-t border-gray-700 pt-3 mt-2">
             <div class="flex items-center justify-between mb-1">
