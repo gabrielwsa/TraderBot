@@ -348,6 +348,37 @@ $tips = [
         $totalExposure  = $tradeValue * $max_open_positions;
         $belowMinOrder  = $tradeValue < 10;
         $exceedsBalance = $totalExposure > $capital_usdt;
+
+        // Trade frequency score
+        $freqScore = 0;
+        $freqScore += $scan_limit >= 100 ? 2 : ($scan_limit >= 50 ? 1 : 0);
+        $freqScore += $min_volatility_pct <= 1 ? 2 : ($min_volatility_pct <= 2 ? 1 : 0);
+        $freqScore += $min_volume_usdt <= 500000 ? 2 : ($min_volume_usdt <= 1000000 ? 1 : 0);
+        $freqScore += $max_open_positions >= 3 ? 2 : ($max_open_positions >= 2 ? 1 : 0);
+        $freqScore += $take_profit_pct <= 1 ? 2 : ($take_profit_pct <= 2 ? 1 : 0);
+
+        if ($freqScore <= 3) {
+            $freqLabel  = 'CONSERVADOR';
+            $freqDesc   = 'Poucos trades por dia — entradas muito seletivas';
+            $freqEst    = '0–3 trades/dia';
+            $freqColor  = 'text-blue-400';
+            $freqBg     = 'bg-blue-950/40 border-blue-900/50';
+            $freqDots   = 1;
+        } elseif ($freqScore <= 6) {
+            $freqLabel  = 'MODERADO';
+            $freqDesc   = 'Equilíbrio entre oportunidades e seletividade';
+            $freqEst    = '3–8 trades/dia';
+            $freqColor  = 'text-yellow-400';
+            $freqBg     = 'bg-yellow-950/40 border-yellow-900/50';
+            $freqDots   = 2;
+        } else {
+            $freqLabel  = 'AGRESSIVO';
+            $freqDesc   = 'Muitas entradas — mais oportunidades, mais exposição';
+            $freqEst    = '8+ trades/dia';
+            $freqColor  = 'text-red-400';
+            $freqBg     = 'bg-red-950/40 border-red-900/50';
+            $freqDots   = 3;
+        }
     @endphp
 
     {{-- Warnings --}}
@@ -453,6 +484,23 @@ $tips = [
         <div class="flex justify-between border-t border-gray-700 pt-1 mt-1">
             <span>Risco/Retorno</span>
             <span class="text-gray-300">1 : {{ $stop_loss_pct > 0 ? number_format($take_profit_pct / $stop_loss_pct, 1) : '—' }}</span>
+        </div>
+        <div class="border-t border-gray-700 pt-3 mt-2">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-gray-400">Volume de trades esperado</span>
+                <div class="flex items-center gap-2">
+                    <div class="flex gap-1">
+                        @for ($i = 1; $i <= 3; $i++)
+                        <span class="w-2 h-2 rounded-full {{ $i <= $freqDots ? str_replace('text-', 'bg-', $freqColor) : 'bg-gray-700' }}"></span>
+                        @endfor
+                    </div>
+                    <span class="font-medium {{ $freqColor }}">{{ $freqLabel }}</span>
+                </div>
+            </div>
+            <div class="flex justify-between text-gray-500">
+                <span>{{ $freqDesc }}</span>
+                <span>{{ $freqEst }}</span>
+            </div>
         </div>
     </div>
 
