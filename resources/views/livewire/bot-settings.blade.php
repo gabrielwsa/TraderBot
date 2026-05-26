@@ -149,17 +149,42 @@ $tips = [
             </div>
 
             <div>
-                <div class="flex items-center gap-1.5 mb-1">
-                    <label class="text-sm text-gray-400">Stop Loss (%)</label>
-                    <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
-                        <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
-                        <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
-                            {{ $tips['stop_loss_pct'] }}
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-sm text-gray-400">Stop Loss (%)</label>
+                        <div class="relative" x-data="{ show: false }" @mouseenter="show = true" @mouseleave="show = false">
+                            <button class="w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs flex items-center justify-center leading-none transition">?</button>
+                            <div x-show="show" x-cloak class="absolute top-full left-0 mt-1.5 z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl">
+                                {{ $tips['stop_loss_pct'] }}
+                            </div>
                         </div>
                     </div>
+                    <button wire:click="$set('stop_loss_enabled', {{ $stop_loss_enabled ? 'false' : 'true' }})"
+                            class="relative inline-flex h-5 w-9 items-center rounded-full transition {{ $stop_loss_enabled ? 'bg-red-600' : 'bg-gray-700' }}">
+                        <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition {{ $stop_loss_enabled ? 'translate-x-4' : 'translate-x-1' }}"></span>
+                    </button>
                 </div>
-                <input wire:model.live="stop_loss_pct" type="text" inputmode="decimal"
-                       class="w-full bg-gray-800 border border-red-900/50 rounded-lg px-4 py-2.5 text-red-300 text-sm focus:border-red-500 focus:outline-none" />
+                <div x-data="{
+                    display: '{{ $stop_loss_pct }}',
+                    update(e) {
+                        this.display = e.target.value;
+                        const v = parseFloat(this.display);
+                        if (this.display !== '' && !this.display.endsWith('.') && !isNaN(v)) {
+                            $wire.set('stop_loss_pct', v);
+                        }
+                    }
+                }">
+                    <input type="text" inputmode="decimal"
+                           :value="display" @input="update($event)"
+                           {{ $stop_loss_enabled ? '' : 'disabled' }}
+                           class="w-full bg-gray-800 border rounded-lg px-4 py-2.5 text-sm focus:outline-none transition
+                               {{ $stop_loss_enabled
+                                   ? 'border-red-900/50 text-red-300 focus:border-red-500'
+                                   : 'border-gray-700 text-gray-600 cursor-not-allowed opacity-50' }}" />
+                </div>
+                @if(!$stop_loss_enabled)
+                <p class="text-yellow-500 text-xs mt-1">Desativado — bot segura a posição</p>
+                @endif
             </div>
 
             <div>
@@ -172,8 +197,20 @@ $tips = [
                         </div>
                     </div>
                 </div>
-                <input wire:model.live="take_profit_pct" type="text" inputmode="decimal"
-                       class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
+                <div x-data="{
+                    display: '{{ $take_profit_pct }}',
+                    update(e) {
+                        this.display = e.target.value;
+                        const v = parseFloat(this.display);
+                        if (this.display !== '' && !this.display.endsWith('.') && !isNaN(v)) {
+                            $wire.set('take_profit_pct', v);
+                        }
+                    }
+                }">
+                    <input type="text" inputmode="decimal"
+                           :value="display" @input="update($event)"
+                           class="w-full bg-gray-800 border border-green-900/50 rounded-lg px-4 py-2.5 text-green-300 text-sm focus:border-green-500 focus:outline-none" />
+                </div>
             </div>
 
             {{-- Trailing Stop --}}
@@ -195,8 +232,20 @@ $tips = [
                 </div>
                 @if ($trailing_stop_enabled)
                 <div class="flex items-center gap-3">
-                    <input wire:model.live="trailing_stop_pct" type="text" inputmode="decimal"
-                           class="w-full bg-gray-800 border border-yellow-900/50 rounded-lg px-4 py-2.5 text-yellow-300 text-sm focus:border-yellow-500 focus:outline-none" />
+                    <div x-data="{
+                        display: '{{ $trailing_stop_pct }}',
+                        update(e) {
+                            this.display = e.target.value;
+                            const v = parseFloat(this.display);
+                            if (this.display !== '' && !this.display.endsWith('.') && !isNaN(v)) {
+                                $wire.set('trailing_stop_pct', v);
+                            }
+                        }
+                    }">
+                        <input type="text" inputmode="decimal"
+                               :value="display" @input="update($event)"
+                               class="w-full bg-gray-800 border border-yellow-900/50 rounded-lg px-4 py-2.5 text-yellow-300 text-sm focus:border-yellow-500 focus:outline-none" />
+                    </div>
                     <span class="text-gray-500 text-xs shrink-0">% abaixo da máxima</span>
                 </div>
                 @error('trailing_stop_pct') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror

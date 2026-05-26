@@ -19,9 +19,14 @@ class BinanceService
         $this->apiSecret = $settings->api_secret ?? '';
     }
 
+    private function http(int $timeout = 10): \Illuminate\Http\Client\PendingRequest
+    {
+        return Http::timeout($timeout)->withOptions(['curl' => [CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4]]);
+    }
+
     public function getKlines(string $symbol, string $interval, int $limit = 100): array
     {
-        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/klines", [
+        $response = $this->http(10)->get("{$this->baseUrl}/api/v3/klines", [
             'symbol' => $symbol,
             'interval' => $interval,
             'limit' => $limit,
@@ -41,7 +46,7 @@ class BinanceService
 
     public function getTopUsdtPairs(float $minVolume, int $limit = 30, float $minVolatilityPct = 0): array
     {
-        $response = Http::timeout(30)->get("{$this->baseUrl}/api/v3/ticker/24hr");
+        $response = $this->http(30)->get("{$this->baseUrl}/api/v3/ticker/24hr");
         $this->assertSuccess($response);
 
         return collect($response->json())
@@ -61,7 +66,7 @@ class BinanceService
 
     public function getPrice(string $symbol): float
     {
-        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/ticker/price", ['symbol' => $symbol]);
+        $response = $this->http(10)->get("{$this->baseUrl}/api/v3/ticker/price", ['symbol' => $symbol]);
         $this->assertSuccess($response);
         return (float) $response->json('price');
     }
@@ -110,7 +115,7 @@ class BinanceService
     public function testConnection(): array
     {
         try {
-            $ping = Http::timeout(5)->get("{$this->baseUrl}/api/v3/ping");
+            $ping = $this->http(5)->get("{$this->baseUrl}/api/v3/ping");
             if ($ping->failed()) {
                 return ['ok' => false, 'message' => 'Servidor inacessível'];
             }
@@ -137,7 +142,7 @@ class BinanceService
 
     public function getLotSizeFilter(string $symbol): array
     {
-        $response = Http::timeout(10)->get("{$this->baseUrl}/api/v3/exchangeInfo", ['symbol' => $symbol]);
+        $response = $this->http(10)->get("{$this->baseUrl}/api/v3/exchangeInfo", ['symbol' => $symbol]);
         $this->assertSuccess($response);
 
         $filters = collect($response->json('symbols.0.filters') ?? []);
@@ -152,7 +157,7 @@ class BinanceService
     public function getOrderbookPressure(string $symbol): array
     {
         try {
-            $response = Http::timeout(5)->get("{$this->baseUrl}/api/v3/depth", ['symbol' => $symbol, 'limit' => 20]);
+            $response = $this->http(5)->get("{$this->baseUrl}/api/v3/depth", ['symbol' => $symbol, 'limit' => 20]);
             if ($response->failed()) return ['available' => false, 'ratio' => 1.0];
             $bids  = collect($response->json('bids', []))->sum(fn($b) => (float) $b[1]);
             $asks  = collect($response->json('asks', []))->sum(fn($a) => (float) $a[1]);
@@ -165,7 +170,7 @@ class BinanceService
     public function getFundingRate(string $symbol): ?float
     {
         try {
-            $response = Http::timeout(5)->get('https://fapi.binance.com/fapi/v1/premiumIndex', ['symbol' => $symbol]);
+            $response = $this->http(5)->get('https://fapi.binance.com/fapi/v1/premiumIndex', ['symbol' => $symbol]);
             if ($response->failed()) return null;
             return (float) $response->json('lastFundingRate', 0);
         } catch (\Exception) {
@@ -176,7 +181,7 @@ class BinanceService
     public function get24hChange(string $symbol): float
     {
         try {
-            $response = Http::timeout(5)->get("{$this->baseUrl}/api/v3/ticker/24hr", ['symbol' => $symbol]);
+            $response = $this->http(5)->get("{$this->baseUrl}/api/v3/ticker/24hr", ['symbol' => $symbol]);
             if ($response->failed()) return 0.0;
             return (float) $response->json('priceChangePercent', 0);
         } catch (\Exception) {
@@ -196,21 +201,31 @@ class BinanceService
 
     public function placeSellOrder(string $symbol, float $quantity): array
     {
-        // Use actual wallet balance if stored quantity exceeds what's available
         $asset   = str_replace('USDT', '', $symbol);
+        $lotSize = $this->getLotSizeFilter($symbol);
         $balance = $this->getAssetBalance($asset);
-        if ($balance > 0 && $balance < $quantity) {
+
+        // Balance below minimum — nothing sellable (dust or already sold)
+        if ($balance < $lotSize['min_qty']) {
+            throw new Exception("Quantity {$balance} below min_qty {$lotSize['min_qty']} for {$symbol}");
+        }
+
+        if ($balance < $quantity) {
             $quantity = $balance;
         }
 
-        $lotSize  = $this->getLotSizeFilter($symbol);
-        $quantity = $this->adjustQuantity($quantity, $lotSize['step_size']);
+        $quantity  = $this->adjustQuantity($quantity, $lotSize['step_size']);
+        $precision = $this->stepSizePrecision($lotSize['step_size']);
+
+        if ($quantity < $lotSize['min_qty']) {
+            throw new Exception("Quantity {$quantity} below min_qty {$lotSize['min_qty']} for {$symbol}");
+        }
 
         return $this->signedPost('/api/v3/order', [
             'symbol'   => $symbol,
             'side'     => 'SELL',
             'type'     => 'MARKET',
-            'quantity' => number_format($quantity, 8, '.', ''),
+            'quantity' => number_format($quantity, $precision, '.', ''),
         ]);
     }
 
@@ -220,13 +235,21 @@ class BinanceService
         return floor($qty / $stepSize) * $stepSize;
     }
 
+    private function stepSizePrecision(float $stepSize): int
+    {
+        if ($stepSize >= 1) return 0;
+        $str = rtrim(sprintf('%.8f', $stepSize), '0');
+        $dot = strpos($str, '.');
+        return $dot !== false ? strlen($str) - $dot - 1 : 0;
+    }
+
     private function signedGet(string $path, array $params = []): array
     {
         $params['timestamp'] = (int) (microtime(true) * 1000);
         $query = http_build_query($params);
         $params['signature'] = hash_hmac('sha256', $query, $this->apiSecret);
 
-        $response = Http::timeout(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
+        $response = $this->http(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
             ->get("{$this->baseUrl}{$path}", $params);
 
         $this->assertSuccess($response);
@@ -239,7 +262,7 @@ class BinanceService
         $query = http_build_query($params);
         $params['signature'] = hash_hmac('sha256', $query, $this->apiSecret);
 
-        $response = Http::timeout(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
+        $response = $this->http(10)->withHeaders(['X-MBX-APIKEY' => $this->apiKey])
             ->asForm()
             ->post("{$this->baseUrl}{$path}", $params);
 

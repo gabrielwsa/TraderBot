@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
+    supervisor \
     && docker-php-ext-install \
         pdo_mysql \
         mbstring \
@@ -29,6 +30,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN usermod -u ${UID} www-data && groupmod -g ${GID} www-data
 
+COPY docker/php/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 WORKDIR /var/www
 
-USER www-data
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

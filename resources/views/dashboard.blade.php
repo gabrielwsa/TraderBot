@@ -6,6 +6,9 @@
             <livewire:today-stats />
         </div>
 
+        {{-- Strategy Guide --}}
+        <x-strategy-guide />
+
         {{-- All-time stats + Bot Control --}}
         <div wire:poll.3s>
             <livewire:bot-status />

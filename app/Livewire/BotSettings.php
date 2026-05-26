@@ -22,6 +22,7 @@ class BotSettings extends Component
     public float $min_volume_usdt = 1000000;
     public float $min_volatility_pct = 1.0;
     public int $scan_limit = 50;
+    public bool $stop_loss_enabled = true;
     public bool $trailing_stop_enabled = true;
     public float $trailing_stop_pct = 1.0;
     public string $timeframe = '15m';
@@ -51,6 +52,7 @@ class BotSettings extends Component
         $this->min_volume_usdt = $s->min_volume_usdt;
         $this->min_volatility_pct = $s->min_volatility_pct ?? 1.0;
         $this->scan_limit = $s->scan_limit ?? 50;
+        $this->stop_loss_enabled = $s->stop_loss_enabled ?? true;
         $this->trailing_stop_enabled = $s->trailing_stop_enabled ?? true;
         $this->trailing_stop_pct = $s->trailing_stop_pct ?? 1.0;
         $this->timeframe = $s->timeframe;
@@ -99,7 +101,7 @@ class BotSettings extends Component
             'capital_usdt'          => 'required|numeric|min:10',
             'capital_per_trade_pct' => 'required|numeric|min:1|max:100',
             'max_open_positions'    => 'required|integer|min:1|max:20',
-            'stop_loss_pct'         => 'required|numeric|min:0.01|max:50',
+            'stop_loss_pct'         => $this->stop_loss_enabled ? 'required|numeric|min:0.01|max:50' : 'nullable|numeric',
             'take_profit_pct'       => 'required|numeric|min:0.01|max:100',
             'min_volume_usdt'       => 'required|numeric|min:0',
             'min_volatility_pct'    => 'required|numeric|min:0|max:50',
@@ -146,6 +148,7 @@ class BotSettings extends Component
             'min_volume_usdt'       => $this->min_volume_usdt,
             'min_volatility_pct'    => $this->min_volatility_pct,
             'scan_limit'            => $this->scan_limit,
+            'stop_loss_enabled'     => $this->stop_loss_enabled,
             'trailing_stop_enabled' => $this->trailing_stop_enabled,
             'trailing_stop_pct'     => $this->trailing_stop_pct,
             'timeframe'             => $this->timeframe,

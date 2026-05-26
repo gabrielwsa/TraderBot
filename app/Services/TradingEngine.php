@@ -82,27 +82,31 @@ class TradingEngine
                     continue;
                 }
 
-                // Trailing stop: raise stop_loss_price as price climbs
-                if ($this->settings->trailing_stop_enabled) {
-                    $this->updateTrailingStop($position, $price);
-                    $position->refresh();
+                if ($this->settings->stop_loss_enabled) {
+                    // Trailing stop: raise stop_loss_price as price climbs
+                    if ($this->settings->trailing_stop_enabled) {
+                        $this->updateTrailingStop($position, $price);
+                        $position->refresh();
+                    }
+
+                    if ($price <= $position->stop_loss_price) {
+                        $reason = $position->stop_loss_price > $position->entry_price * (1 - $this->settings->stop_loss_pct / 100 * 1.01)
+                            ? 'trailing_stop'
+                            : 'stop_loss';
+                        BotLog::warning("Stop loss triggered for {$position->pair} at {$price} [{$reason}]");
+                        $this->closePosition($position, $reason);
+                        continue;
+                    }
                 }
 
-                if ($price <= $position->stop_loss_price) {
-                    $reason = $position->stop_loss_price > $position->entry_price * (1 - $this->settings->stop_loss_pct / 100 * 1.01)
-                        ? 'trailing_stop'
-                        : 'stop_loss';
-                    BotLog::warning("Stop loss triggered for {$position->pair} at {$price} [{$reason}]");
-                    $this->closePosition($position, $reason);
-                    continue;
-                }
+                if ($this->settings->stop_loss_enabled) {
+                    $klines  = $this->binance->getKlines($position->pair, $this->settings->timeframe, 50);
+                    $analysis = $this->indicators->analyze($klines);
 
-                $klines  = $this->binance->getKlines($position->pair, $this->settings->timeframe, 50);
-                $analysis = $this->indicators->analyze($klines);
-
-                if ($analysis['signal'] === 'SELL') {
-                    BotLog::trade("Signal exit for {$position->pair}: " . implode(', ', $analysis['reasons']));
-                    $this->closePosition($position, 'signal');
+                    if ($analysis['signal'] === 'SELL') {
+                        BotLog::trade("Signal exit for {$position->pair}: " . implode(', ', $analysis['reasons']));
+                        $this->closePosition($position, 'signal');
+                    }
                 }
             } catch (Exception $e) {
                 BotLog::error("Error monitoring {$position->pair}: " . $e->getMessage());
@@ -293,7 +297,24 @@ class TradingEngine
     {
         $feeRate = $this->settings->fee_rate;
 
-        $order = $this->binance->placeSellOrder($position->pair, $position->quantity);
+        try {
+            $order = $this->binance->placeSellOrder($position->pair, $position->quantity);
+        } catch (Exception $e) {
+            if (str_contains($e->getMessage(), 'below min_qty')) {
+                $realizedPnl    = ($position->current_price - $position->entry_price) * $position->quantity;
+                $realizedPnlPct = (($position->current_price / $position->entry_price) - 1) * 100;
+                $position->update([
+                    'status'           => 'closed',
+                    'close_price'      => $position->current_price,
+                    'realized_pnl'     => $realizedPnl,
+                    'realized_pnl_pct' => $realizedPnlPct,
+                    'close_reason'     => 'dust',
+                ]);
+                BotLog::warning("Dust position closed for {$position->pair} — saldo insuficiente para vender (abaixo do mínimo da Binance)");
+                return;
+            }
+            throw $e;
+        }
 
         $executedQty   = (float) ($order['executedQty'] ?? $position->quantity);
         $receivedUsdt  = (float) ($order['cummulativeQuoteQty'] ?? 0);

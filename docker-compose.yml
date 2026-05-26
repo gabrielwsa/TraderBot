@@ -13,6 +13,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   nginx:
     build:
@@ -51,38 +53,6 @@ services:
       - "6379:6379"
     networks:
       - laravel
-
-  scheduler:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-      args:
-        UID: 1000
-        GID: 1000
-    volumes:
-      - .:/var/www
-    command: php artisan schedule:work
-    networks:
-      - laravel
-    depends_on:
-      db:
-        condition: service_healthy
-
-  queue:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-      args:
-        UID: 1000
-        GID: 1000
-    volumes:
-      - .:/var/www
-    command: php artisan queue:work redis --queue=high,default --sleep=3 --tries=1 --timeout=300
-    networks:
-      - laravel
-    depends_on:
-      - redis
-      - db
 
 networks:
   laravel:
